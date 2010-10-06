@@ -33,7 +33,7 @@ C
 C
 C *** estimate the number of species JMA
        DO 102 J=1,10
-      IF(DN(J).LE.0.) GOTO 103
+      IF(DN(J).EQ.0.) GOTO 103
       JMA=J
   102 CONTINUE
   103 CONTINUE
