@@ -30,7 +30,7 @@ C
       T(J)=TA(J)/TA(1)
       ISP(J)=SQRT(ASS(J))
       IF(ISP(J).LT.4) ISP(J)=ISP(J)+1
-      IF(DN(J).LE.0.) GOTO 2
+      IF(DN(J).EQ.0.) GOTO 2
       JMA=J
       RED=RED+DN(J)/REN(J)
       IF( ISP(J).EQ.1.) DEN=DEN+DN(J)
@@ -61,7 +61,7 @@ C      PRINT 100,(ITID(I), I=7,2,-1)
      #       'KHZ GYRO FREQ.:',  F10.4,  'KHZ   ',
      #       'ELECTRON DENSITY:',1PE11.5,  'M-3'   )
       DO 4 J=1,JMA
-  102 FORMAT('# ',  A3,  '  DN=',1PE11.5,  '  T=',0PF9.5,  '  D=',  F4.2,
+  102 FORMAT('# ',  A3,  '  DN=',1PE12.5,  '  T=',0PF9.5,  '  D=',  F4.2,
      #'  A=',  F4.2,  '  B=',  F4.2,  ' VD=',  F5.2)
     4 PRINT 102,SPE(ISP(J)),DN(J),TA(J),D(J),A(J),B(J),VD(J)
 C
