@@ -12,7 +12,7 @@ CC   = /bin/cc -Ae
 BINDIR = .
 # BINDIR = ~/bin
 
-FFLAGS = -c -ffixed-line-length-none -Wall -fdefault-double-8 -fdefault-integer-8 -fdefault-real-8 
+FFLAGS = -c -ffixed-line-length-none -fdefault-double-8 -fdefault-integer-8 -fdefault-real-8 
 .f.o:
 	${FTN}  ${FFLAGS}  $<
 
