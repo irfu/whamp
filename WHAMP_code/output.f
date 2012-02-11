@@ -90,10 +90,10 @@ c     * abs(e)/abs(b) *
    11 FORMAT( ' ',1pE14.7,1PE10.2,'  ',$)
       IF(IC.NE.'A' .and. ic .ne. 'a') GOTO 1
    12 WRITE(*,13)P
-   13 FORMAT(' ',F10.7,'  ',$)
+   13 FORMAT(' ',F12.7,'  ',$)
       IF(IC.NE.'A' .and. ic .ne. 'a') GOTO 1
    14 WRITE(*,15)Z
-   15 FORMAT(' ',F10.7,'  ',$)
+   15 FORMAT(' ',F12.7,'  ',$)
       IF(IC.NE.'A' .and. ic .ne. 'a') GOTO 1
       PRINT 6
    16 WRITE(*,17) EFL
