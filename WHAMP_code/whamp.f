@@ -19,8 +19,7 @@ C
 c      IF(IREAD_FILE.EQ.1)CALL READ_INPUT_FILE(FILENAME)   
       CALL READ_INPUT_FILE(FILENAME)
 C
-      NPL=0 
-
+      IERR=0
       NPL=0
     1 DEN=0.
       RED=0.
