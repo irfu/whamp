@@ -43,7 +43,7 @@ pzl     / 1 - log scale, 0 - linear scale /
 Plasma with B=100nT, n=1cm-3, there are only
 oxygen ions (Tperp=50eV, Tpar=10eV, vd=1*vt_par)
 and 1eV electrons.
-============ Example file would have 9 lines ===========
+============ Example_Input_File would have 9 lines ===========
 1.e6 1.e6 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 .001 .001 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 1.   1.   1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
