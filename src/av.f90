@@ -54,7 +54,6 @@ SUBROUTINE AV
   ENFIELD=1.0+B/A*299.79*299.79
 
   ! *** Loop through all species
-
   species_loop: DO J=1,JMA
      !
      !              *********** FORM DIELECTRIC TENSOR ************
@@ -64,18 +63,20 @@ SUBROUTINE AV
      E(4,1)=1.
      E(6,1)=1.
      !
-     !av      DO 135 J=1,JMA
+     !TODO: double check that this does not include vacuum energy
      E(1,1)=E(1,1)-XP(J)
      E(4,1)=E(4,1)-XP(J)
      E(6,1)=E(6,1)-XP(J)
-     IF(AA(J,1).NE.AA(J,2)) GOTO 132
-     AA(J,2)=0.
-     DD(J)=1.
-132  IB=1
+     if (AA(J,1) == AA(J,2)) then 
+         AA(J,2)=0.
+         DD(J)=1.
+     end if
+     IB=1
      DF=XP(J)/(AA(J,1)*(AA(J,1)-AA(J,2)))
      Q=AA(J,1)-DD(J)*AA(J,2)
      IERR=0
-133  CALL CHI(XSI,J,IB,4,IERR)
+iteration_loop:  do
+     CALL CHI(XSI,J,IB,4,IERR)
      IF(IERR.NE.0) RETURN 
      DO K=1,4
         DO I=1,6
@@ -83,12 +84,11 @@ SUBROUTINE AV
         end DO
      end DO
      !
-     IF(IB.EQ.2) GOTO 135
+     IF(IB.EQ.2) exit iteration_loop
      Q=(DD(J)-1.)*AA(J,1)
-     IF(Q.EQ.0.) GOTO 135
+     IF(Q.EQ.0.) exit iteration_loop
      IB=2
-     GOTO 133
-135  CONTINUE
+     end do iteration_loop
      !                       *** DIELECTRIC TENSOR COMPUTED ***
      !
      !       ******* FORM REFRACTIVE INDEX, CV=SPEED OF LIGHT/THERM. SPEED. *
