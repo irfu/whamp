@@ -1,0 +1,6 @@
+*.o
+*.DS_Store
+*.asv
+src/*.mod
+src/whamp
+
