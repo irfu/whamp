@@ -10,13 +10,13 @@ PROGRAM WHAMP
   ! the kind of 1.0d0
   integer, parameter :: d2p=kind(1.0d0)
 
-  integer :: I,IERR,IRK,ISP,ITID,J,KFS
+  integer :: I,IERR,IRK,ISP,J,KFS
   integer :: flag_convergence,flag_too_heavily_damped,flag_new_plasma
   real(kind=d2p) :: ADIR,DEK,DEN,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
   real(kind=d2p) :: RED,REN, RN, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   CHARACTER FILENAME*(80)
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP,CX
-  DIMENSION REN(10),T(10),ST(10),ISP(10),ITID(7)
+  DIMENSION REN(10),T(10),ST(10),ISP(10)
   CHARACTER SPE(5)*3
 
   DATA SPE/'E- ','H+ ','HE+','O+ ','   '/
@@ -73,7 +73,8 @@ PROGRAM WHAMP
      !
      !                  ****  ASK FOR INPUT!  **** 
      typin_loop: do 
-        if(flag_new_plasma==0) CALL TYPIN(flag_new_plasma,KFS) !for new plasma skip calling typin until convergence checked
+        !for new plasma skip calling typin until convergence checked
+        if(flag_new_plasma==0) CALL TYPIN(flag_new_plasma,KFS) 
         if(flag_new_plasma==1) cycle plasma_update_loop
         flag_new_plasma=0
         KV=1

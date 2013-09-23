@@ -20,6 +20,7 @@ CHARACTER IOU*20
 CHARACTER IC*1
 !
 real(kind=d2p),parameter :: PI=3.14159265358979_d2p
+
 K=0
 output_loop: do 
     K=K+1
@@ -34,12 +35,6 @@ output_loop: do
         IF(LINDEX.EQ.0) then
             LINDEX = INDEX(LOW_LTRS,IC)
         endif
-        !              A  B  C  D  E  F  G  H  I  J  K  L    M
-        !         GOTO(10,18, 1,24,16,10,20,781,1, 1, 1, 773, 775,
-        !     A       777, 771,12, 1,26,22,28,275,793,32, 791,795,14) LINDEX
-        !              N  O    P  Q  R  S  T  U   V  W    X  Y  Z
-        !
-        ! ** added different stuff by Andris **
         select case (LINDEX)
         case(15) ! O
             WRITE(*,772) andE
