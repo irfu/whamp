@@ -1,7 +1,3 @@
-!**************************************************************
-!
-! File output.f 
-
 SUBROUTINE OUTPT
 use comin
 use comcout
@@ -21,7 +17,6 @@ CHARACTER UPP_LTRS*26,LOW_LTRS*26
 PARAMETER( UPP_LTRS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )
 PARAMETER( LOW_LTRS = 'abcdefghijklmnopqrstuvwxyz' )
 CHARACTER IOU*20
-CHARACTER OFIL*20
 CHARACTER IC*1
 !
 real(kind=d2p),parameter :: PI=3.14159265358979_d2p
@@ -187,7 +182,3 @@ output_format_loop: do
     end do
 end do output_format_loop
 end SUBROUTINE OUTPT
-
-
-
-
