@@ -1,7 +1,3 @@
-!**************************************************************
-!
-! File typin.f 
-
 SUBROUTINE TYPIN(NPL,KFS)
   !        ARGUMENTS: NPL    NEW PLASMA. WHEN A PLASMA PARAMETER IS
   !                                      CHANGED, NPL IS SET TO 1.
@@ -9,8 +5,6 @@ SUBROUTINE TYPIN(NPL,KFS)
   !                          =2  Z SPECIFIED LAST.i
   use comin
   implicit none
-  ! find the kind of a high precision variable, by finding 
-  ! the kind of 1.0d0
   integer, parameter :: d2p=kind(1.0d0)
 
   integer :: IE,IOF,IOS,KFS,NC,NPL,NV

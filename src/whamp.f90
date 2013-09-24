@@ -6,8 +6,6 @@ PROGRAM WHAMP
   use comin
   use comcout
   implicit none
-  ! find the kind of a high precision variable, by finding 
-  ! the kind of 1.0d0
   integer, parameter :: d2p=kind(1.0d0)
 
   integer :: I,IERR,IRK,ISP,J,KFS

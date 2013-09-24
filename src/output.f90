@@ -2,8 +2,6 @@ SUBROUTINE OUTPT
 use comin
 use comcout
 implicit none
-! find the kind of a high precision variable, by finding 
-! the kind of 1.0d0
 integer, parameter :: d2p=kind(1.0d0)
 
 real(kind=d2p) :: andE,andphi,coef_poynt,dla,dlb,dle,Sx,Sy,Sz
@@ -175,5 +173,6 @@ output_format_loop: do
             IF(IC.EQ.'W'.OR.IC.EQ.'w')CALL WRFI(2)
         endif
     end do
+    exit output_format_loop
 end do output_format_loop
 end SUBROUTINE OUTPT
