@@ -78,13 +78,14 @@ PROGRAM WHAMP
         KV=1
         PLG=PM(1)
         IF(PM(3).LT.0.) PLG=PM(2)
-        P=PLG
         ZLG=ZM(1)
         IF(ZM(3).LT.0.) ZLG=ZM(2)
-        Z=ZLG
         IF(PZL==1.) then
            P=10.**PLG
            Z=10.**ZLG
+        else
+           P=PLG
+           Z=ZLG
         end if
         X=XOI
         z_p_loop: do
@@ -102,19 +103,27 @@ PROGRAM WHAMP
            IF(IERR.NE.0) flag_too_heavily_damped=1
            !                  ****  START OF ITERATION.  ****
            flag_convergence=0 ! default assume no convergence       
-           iteration_loop: DO I=1,20
+           iteration_loop: DO I=1,50
               ADIR=ABS(D)
               IRK=0
-              CX=D/DX
+              if (I < 2) then
+                  CX=REALPART(D)/REALPART(DX)
+              else
+                  CX=D/DX
+                  CX=CX*X/(2*CX+X)
+              end if
+                  !write(*,*) I,') X=',X,'CX=',CX,'D=',D,'DX=',DX ! DEBUG
               irk_loop: do
                  X=X-CX
+                  !write(*,*) '2) X=',X ! DEBUG
                  OME=(X*XA)**2
                  FPX=PFQ/OME
                  DO  J=1,JMA
                     XP(J)=DN(J)/DEK/REN(J)/OME
                     XX(J)=X*REN(J)
                  end do
-                 IF(ABS(CX).LE.1.E-6*ABS(X)) then
+                 IF( (ABS(CX).LE.1.E-6*ABS(X)) &    ! relative frequency precision
+                     & .or. (ABS(CX) < 1e-6) ) then ! absolute precision
                     flag_convergence=1
                     exit iteration_loop
                  else
@@ -144,7 +153,7 @@ PROGRAM WHAMP
               CALL DIFU(4,JMA,IERR)
            end if
            if  ((flag_convergence==1) .AND. (flag_too_heavily_damped==0)) then
-              X=X-D/DX
+ !             X=X-D/DX
               !
               XI=DIMAG(X)
               VG(1)=-DP/DX
@@ -224,17 +233,3 @@ PROGRAM WHAMP
      end do typin_loop
   end do plasma_update_loop
 end program WHAMP
-
-SUBROUTINE EPSGRAD(XSI, DF, Q, J, IB) 
-  use comin 
-
-  !*****  This dummy routine, which is called from DIFU, replaces
-  !*****  a subroutine needed in the ray-tracing version of the code.
-  !*****  
-  ! 
-  RETURN
-END SUBROUTINE EPSGRAD
-
-
-
-

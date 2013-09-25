@@ -40,7 +40,6 @@ SUBROUTINE DIFU(KOL,JMAX,IERR)
      chi_loop: do 
         CALL CHI(XSI,J,IB,KOL,IERR)
         IF(IERR.NE.0) RETURN 
-        if (kol .eq. 5) call epsgrad(xsi, df, q, j, ib)
         E(1:6,1:KOLLA)=E(1:6,1:KOLLA)+DF*Q*XSI(1:6,1:KOLLA)
         !
         IF(IB.EQ.2) cycle species_loop
