@@ -6,17 +6,41 @@ integer, parameter :: d2p=kind(1.0d0)
 
 real(kind=d2p) :: andE,andphi,coef_poynt,dla,dlb,dle,Sx,Sy,Sz
 COMPLEX(kind=d2p) :: andbz
-INTEGER :: I,IOS,J,K,KMX,LINDEX,M,N  
+INTEGER :: I,IOS,J,K,KMX,M,N  
 SAVE
 integer,PARAMETER :: IFILE = 5 
 CHARACTER CC*1
 PARAMETER( CC = '$' )
-CHARACTER UPP_LTRS*26,LOW_LTRS*26
-PARAMETER( UPP_LTRS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )
-PARAMETER( LOW_LTRS = 'abcdefghijklmnopqrstuvwxyz' )
 CHARACTER IOU*20
 CHARACTER IC*1
-!
+105  FORMAT( &
+    &  ' The output is determined by a string of letters:'//&
+    &  ' b     wave magnetic field components.'/&
+    &  ' d     dispersion function and derivatives.'/&
+    &  ' e     wave electric field components.'/&
+    &  ' f     frequency <real,imaginery>.'/&
+    &  ' g     group velocity components.'/&
+    &  ' h     |e|/|b| [mV/nT].'/&
+    &  ' l     |bp|/|bz|.'/&
+    &  ' m     Im[bx]/Re[by].'/&
+    &  ' n     ellipticity bx/by.'/&
+    &  ' o     ellipticity general'/&
+    &  ' p     perpendicular component of wave vector.'/&
+    &  ' r     refractive index.'/&
+    &  ' s     spatial growth-rates.'/&
+    &  ' t     dielectric tensor and derivatives.'/&
+    &  ' z     z-component of wave vector.'/&
+    &  ' u     total wave energy / energy in electric field.'/&
+    &  ' v     Poynting flux (in uW/m2 for <E^2>=0.5(mV/m)^2).'/&
+    &  ' x     phase of bz against bx (/+/ means bz is in front of bx).'/&
+    &  ' y     energy density and flux of each plasma component.'/& 
+    &  ' The results are  normally printed on one line in the order'/&
+    &  ' they are specified. A new line is obtained by inserting'/&
+    &  ' a "/" in the string.'/&
+    &  ' Example: output: pzf/e'/&
+    &  ' The wave numbers and the frequency are printed on one line,'/&
+    &  ' and the electric field components on the next.'//)
+
 real(kind=d2p),parameter :: PI=3.14159265358979_d2p
 
 K=0
@@ -29,38 +53,34 @@ output_loop: do
         PRINT 6
         6       FORMAT('  ')
     ELSE
-        LINDEX = INDEX(UPP_LTRS,IC)
-        IF(LINDEX.EQ.0) then
-            LINDEX = INDEX(LOW_LTRS,IC)
-        endif
-        select case (LINDEX)
-        case(15) ! O
+        select case (IC)
+        case('O','o') ! O
             WRITE(*,772) andE
             772        FORMAT ( ' elip= ',e8.2,' ',$)
             ! ** bp/bz amplitude **
-        case(12) ! L
+        case('L','l') ! L
             WRITE(*,774) SQRT(dimag(BFL(1))*dimag(BFL(1))+real(BFL(2))&
             & *real(BFL(2)))/ABS(BFL(3))
             774        FORMAT( ' bp/bz= ', e8.2, ' ', $)
-        case(13) !M
+        case('M','m') !M
             ! ** bx/by amplitude **
             write(*,776) abs(dimag(bfl(1))/real(bfl(2)))
             776        format( ' bx/by= ', e8.2,' ',$)
             ! ** ellipticity min(bx,by)/max(bx.by) **
-        case(14) !N
+        case('N','n') !N
             write(*,778) min(abs(dimag(bfl(1))),abs(real(bfl(2))))&
             & /MAX(abs(dimag(BFL(1))),ABS(real(BFL(2))))*(real(BFL(1))*&
             & dimag(BFL(2))-dimag(BFL(1))*real(BFL(2)))/ABS(real(BFL(1))*&
             & dimag(BFL(2))-dimag(BFL(1))*real(BFL(2)))
             778        FORMAT ( ' e= ',e8.2,' ',$)
             ! ** bz-bx phase angle **     
-        case(24) ! X
+        case('X','x') ! X
             andbz=BFL(3)*conjg(BFL(1))/ABS(BFL(1))
             andphi=acos(real(andbz)/max(abs(real(andbz)),abs(andbz)))*180/PI
             andphi=sign(andphi,dimag(andbz))
             WRITE(*,792) andphi
             792        FORMAT ( ' phi(bz-bx)= ',f8.2,' ',$)
-        case(22) ! V
+        case('V','v') ! V
             !     write Poynting vector uW/m^2
             coef_poynt = 10.0/4.0/PI/2.0
             Sx = real(efl(2)*conjg(bfl(3))-efl(3)*conjg(bfl(2)))*coef_poynt
@@ -69,54 +89,54 @@ output_loop: do
             write(*,794) Sx,Sy,Sz
             794        FORMAT (' Sx= ',e8.2, ' Sy= ',e8.2, ' Sz= ',e9.3,' ',$) 
             !     * abs(e)/abs(b) *
-        case(25) ! Y
+        case('Y','y') ! Y
             CALL AV
-        case(8) !H
+        case('H','h') !H
             dle=EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3))    
             dlb=BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3))
             dla=sqrt(dle/dlb)
             WRITE(*,782)  dla
             782        FORMAT(' E/B= ',E9.3,' ',$)
             PRINT 6
-        case(1,6) !A,F
+        case('F','f') !A,F
             WRITE(*, 11) X
             11         FORMAT( ' ',1pE14.7,1PE10.2,'  ',$)
-        case(16) ! P
+        case('P','p') ! P
             WRITE(*,13)P
             13         FORMAT(' ',F12.7,'  ',$)
-        case(26) ! Z
+        case('Z','z') ! Z
             WRITE(*,15)Z
             15         FORMAT(' ',F12.7,'  ',$)
-        case(5) ! E
+        case('E','e') ! E
             WRITE(*,17) EFL
             17         FORMAT(' EX=',F7.4,F8.4,'  EY=',F7.4,F8.4,&
             &  '  EZ=',F7.4,F8.4,' ',$)
-        case(2) !B
+        case('B','b') !B
             WRITE(*,19) BFL
             19         FORMAT(' BX=',1PE10.2,1PE10.2,'  BY=',1PE10.2,1PE10.2,&
             &  '  BZ=',1PE10.2,1PE10.2,' ',$)
-        case(7) ! G
+        case('G','g') ! G
             WRITE(*,21) VG
             21         FORMAT(' VGP= ',1PE9.2,'  VGZ= ',1PE9.2,'  ',$)
-        case(19) !s
+        case('S','s') !s
             WRITE(*,23) SG
             !   22 sabs=DIMAG(X)/SQRT(VG(1)*VG(1)+VG(2)*VG(2))*1.e6
             !      WRITE(*,231) sabs
             23         FORMAT(' SGP= ',1PE9.2,'  SGZ= ',E9.2,'  ',$)
             !  231 FORMAT(' ',1PE9.2,'  ',$)
-        case(4) ! D
+        case('D','d') ! D
             WRITE(*,25) D, DX, DZ, DP
             25         FORMAT(1P,'D=',2E10.2,'  DX=',2E10.2,'  DZ=',2E10.2,&
             & ' DP=',2E10.2,/,$)
-        case(18) !R
+        case('R','r') !R
             WRITE(*,27) RI
             27         FORMAT(' RI=',1P,2E10.2,$)
             PRINT 6
-        case(21) !U
+        case('U','u') !U
             WRITE(*,276) ENE*2.0
             276        FORMAT(' ene= ',1PE10.2,$)
             !      PRINT 6
-        case(20) ! T
+        case('T','t') ! T
             DO 30 J=1,6
                 N=1+J/4+J/6
                 M=J-J/4*2-J/6
@@ -127,11 +147,12 @@ output_loop: do
             PRINT 6
             PRINT 31, XX, PP ,ZZ
             31         FORMAT( 1P, ' XX=',12E12.3/' PP=',6E12.3/' ZZ=',6E12.3/)
-        case(3,9:11,17)
-            ! do nothing
-        case(23) ! W
+        case('W','w') ! W
             CALL WRFI(0)
             IF(IOU(1:5).EQ.'W    ')RETURN
+        case(' ') ! ignore spaces
+        case default
+            write(*,*) 'Unknown output request:',IC
         end select
     endif
 end do output_loop
@@ -146,32 +167,22 @@ output_format_loop: do
     END IF
     DO K=1,20 ! loop through all input characters
         IC = IOU( K : K )
-        IF(IC.EQ.'H') then ! print help
-            !
-            PRINT 105
-            105  FORMAT( ' THE OUTPUT IS DETERMINED BY A STRING OF LETTERS:'//&
-            &  ' A     ALL AVAILABLE OUTPUT.'/&
-            &  ' B     WAVE MAGNETIC FIELD COMPONENTS.'/&
-            &  ' D     DISPERSION FUNCTION AND DERIVATIVES.'/&
-            &  ' E     WAVE ELECTRIC FIELD COMPONENTS.'/&
-            &  ' F     FREQUENCY.'/&
-            &  ' G     GROUP VELOCITY COMPONENTS.'/&
-            &  ' P     PERPENDICULAR COMPONENT OF WAVE VECTOR.'/&
-            &  ' R     REFRACTIVE INDEX.'/&
-            &  ' S     SPATIAL GROWTH-RATES.'/&
-            &  ' T     DIELECTRIC TENSOR AND DERIVATIVES.'/&
-            &  ' Z     Z-COMPONENT OF WAVE VECTOR.'//&
-            &  ' THE RESULTS ARE  NORMALLY PRINTED ON ONE LINE IN THE ORDER'/&
-            &  ' THEY ARE SPECIFIED. A NEW LINE IS OBTAINED BY INSERTING'/&
-            &  ' A "/" IN THE STRING.'/&
-            &  ' EXAMPLE: OUTPUT: PZF/E'/&
-            &  ' THE WAVE NUMBERS AND THE FREQUENCY ARE PRINTED ON ONE LINE,'/&
-            &  ' AND THE ELECTRIC FIELD COMPONENTS ON THE NEXT.'//)
+        select case (IC)
+        case('H','h','?') ! help
+            PRINT 105 ! print output options, defined in the beginning of file
             cycle output_format_loop  
-        else if  (IC.NE.' ') then 
+        case(' ')
+        case ('+') ! print debug info
+            printDebugInfo = .true.
+            IOU(K:K)=' '
+        case ('-') ! remove printing debug info
+            printDebugInfo = .false.
+            IOU(K:K)=' '
+        case default ! any character
             KMX=K
-            IF(IC.EQ.'W'.OR.IC.EQ.'w')CALL WRFI(2)
-        endif
+            !IF(IC.EQ.'W'.OR.IC.EQ.'w')CALL WRFI(2) ! WDF reconectroctions, dump
+            !to file
+        end select
     end do
     exit output_format_loop
 end do output_format_loop

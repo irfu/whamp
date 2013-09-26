@@ -23,6 +23,7 @@ real(kind=d2p) :: PZL      ! option L, =0 linear input, =1 logarythmic input of 
 complex(kind=d2p) :: XX(10)
 complex(kind=d2p) :: XP(10) 
 
+logical        :: printDebugInfo=.false.
 end module comin
 
 

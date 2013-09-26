@@ -9,7 +9,9 @@ PROGRAM WHAMP
   integer, parameter :: d2p=kind(1.0d0)
 
   integer :: I,IERR,IRK,ISP,J,KFS
-  integer :: flag_convergence,flag_too_heavily_damped,flag_new_plasma
+  logical :: rootFindingConverged 
+  logical :: solutionIsTooHeavilyDamped
+  logical :: isChangedPlasmaModel
   real(kind=d2p) :: ADIR,DEK,DEN,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
   real(kind=d2p) :: RED,REN, RN, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   CHARACTER FILENAME*(80)
@@ -18,16 +20,13 @@ PROGRAM WHAMP
   CHARACTER SPE(5)*3
 
   DATA SPE/'E- ','H+ ','HE+','O+ ','   '/
-  !     REAL CHARGE(6)
-  !      DATA CHARGE/1.,1.,1.,1.,1.,1./
-  ! 
-  !      IF(IREAD_FILE.EQ.1)CALL READ_INPUT_FILE(FILENAME)   
+  
   CALL READ_INPUT_FILE(FILENAME)
   !
   IERR=0
 
   plasma_update_loop: do
-     flag_new_plasma=0 ! changed to 1 in code when new plasma parameters are entered
+     isChangedPlasmaModel = .false. ! changed to .true. in code when new plasma parameters are entered
      DEN=0.d+0
      RED=0.d+0
      species_loop: DO J=1,10
@@ -58,23 +57,14 @@ PROGRAM WHAMP
      CV=TR*(1022._d2p+TR)/(511._d2p+TR)**2
      CV=1./SQRT(CV)
      DEK=DEK*RN
-     !                  ****  PRINT PLASMA PARAMETERS.  ****
-     PRINT 101,PX,XC,DEN
-101  FORMAT('# PLASMA FREQ.:',  F11.4,&
-          &       'KHZ GYRO FREQ.:',  F10.4,  'KHZ   ',&
-          &       'ELECTRON DENSITY:',1PE11.5,  'M-3'   )
-     DO  J=1,JMA
-102     FORMAT('# ',  A3,  '  DN=',1PE12.5,  '  T=',0PF9.5,  '  D=',  F4.2,&
-             &'  A=',  F4.2,  '  B=',  F4.2,  ' VD=',  F5.2)
-        PRINT 102,SPE(ISP(J)),DN(J),TA(J),DD(J),AA(J,1),AA(J,2),VD(J)
-     end do
      !
+     call print_plasma_parameters()
      !                  ****  ASK FOR INPUT!  **** 
      typin_loop: do 
         !for new plasma skip calling typin until convergence checked
-        if(flag_new_plasma==0) CALL TYPIN(flag_new_plasma,KFS) 
-        if(flag_new_plasma==1) cycle plasma_update_loop
-        flag_new_plasma=0
+        if(.not.isChangedPlasmaModel) call  TYPIN(isChangedPlasmaModel,KFS) 
+        if(isChangedPlasmaModel)      cycle plasma_update_loop
+        isChangedPlasmaModel = .false.
         KV=1
         PLG=PM(1)
         IF(PM(3).LT.0.) PLG=PM(2)
@@ -98,62 +88,20 @@ PROGRAM WHAMP
               XP(J)=DN(J)/DEK/REN(J)/OME
            end do
            !
-           flag_too_heavily_damped=0;
-           CALL DIFU(2,JMA,IERR)
-           IF(IERR.NE.0) flag_too_heavily_damped=1
-           !                  ****  START OF ITERATION.  ****
-           flag_convergence=0 ! default assume no convergence       
-           iteration_loop: DO I=1,50
-              ADIR=ABS(D)
-              IRK=0
-              if (I < 2) then
-                  CX=REALPART(D)/REALPART(DX)
-              else
-                  CX=D/DX
-                  CX=CX*X/(2*CX+X)
-              end if
-                  !write(*,*) I,') X=',X,'CX=',CX,'D=',D,'DX=',DX ! DEBUG
-              irk_loop: do
-                 X=X-CX
-                  !write(*,*) '2) X=',X ! DEBUG
-                 OME=(X*XA)**2
-                 FPX=PFQ/OME
-                 DO  J=1,JMA
-                    XP(J)=DN(J)/DEK/REN(J)/OME
-                    XX(J)=X*REN(J)
-                 end do
-                 IF( (ABS(CX).LE.1.E-6*ABS(X)) &    ! relative frequency precision
-                     & .or. (ABS(CX) < 1e-6) ) then ! absolute precision
-                    flag_convergence=1
-                    exit iteration_loop
-                 else
-                    CALL DIFU(2,JMA,IERR)
-                    IF(IERR.NE.0) then
-                       flag_too_heavily_damped=1
-                       exit iteration_loop
-                    end if
-                    IF(ABS(D).LT.ADIR) cycle iteration_loop
-                    X=X+CX
-                    CX=CX/2.
-                    IRK=IRK+1
-                    IF(IRK.GT.20) exit iteration_loop
-                 end if
-              end do irk_loop
-           end do iteration_loop
+           solutionIsTooHeavilyDamped = .false. ! default not heaviily damped
+           rootFindingConverged       = .false. ! default no convergence       
+           call root_finding
            !
-           if (flag_convergence==0) then
+           if (.not. rootFindingConverged ) then
               PRINT 125,P,Z,X,I,IRK
 125           FORMAT(2X,'NO CONVERGENCE!'/'  KP=',F6.3,'  KZ=',&
                    &  F6.4,'  X=',E12.2,E12.2/'  I=',I3,'  IRK=',I3/)
               IF(KFS .EQ. 1) PLG = 1.D99 ! end cycling in P
               IF(KFS .EQ. 2) ZLG = 1.D99 ! end cycling in Z
            end if
-           if ((flag_convergence==1) .AND. (flag_too_heavily_damped==0)) then
+           if ((rootFindingConverged) .AND. (.not.solutionIsTooHeavilyDamped)) then
               !                  ****  CONVERGENCE!  ****
               CALL DIFU(4,JMA,IERR)
-           end if
-           if  ((flag_convergence==1) .AND. (flag_too_heavily_damped==0)) then
- !             X=X-D/DX
               !
               XI=DIMAG(X)
               VG(1)=-DP/DX
@@ -178,7 +126,7 @@ PROGRAM WHAMP
                  KV=0
               end if
            end if
-           if (flag_too_heavily_damped==1) then
+           if (solutionIsTooHeavilyDamped) then
               PRINT*,' TOO HEAVILY DAMPED!'
               PRINT*,'   '
               IERR=0
@@ -232,4 +180,76 @@ PROGRAM WHAMP
         end do z_p_loop
      end do typin_loop
   end do plasma_update_loop
+  contains
+  subroutine print_plasma_parameters
+ !                  ****  PRINT PLASMA PARAMETERS.  ****
+     PRINT 101,PX,XC,DEN
+101  FORMAT('# PLASMA FREQ.:',  F11.4,&
+          &       'KHZ GYRO FREQ.:',  F10.4,  'KHZ   ',&
+          &       'ELECTRON DENSITY:',1PE11.5,  'M-3'   )
+     DO  J=1,JMA
+102     FORMAT('# ',  A3,  '  DN=',1PE12.5,  '  T=',0PF9.5,  '  D=',  F4.2,&
+             &'  A=',  F4.2,  '  B=',  F4.2,  ' VD=',  F5.2)
+        PRINT 102,SPE(ISP(J)),DN(J),TA(J),DD(J),AA(J,1),AA(J,2),VD(J)
+     end do
+     !
+  end subroutine
+  subroutine root_finding
+      integer(kind=4),parameter :: maxIterations=50
+      CALL DIFU(2,JMA,IERR)
+      IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
+      !                  ****  START OF ITERATION.  ****
+      if (printDebugInfo) write(*,*) 'START:','. X=',X,'D=',D,'DX=',DX ! DEBUG
+      iteration_loop: DO I=1,maxIterations
+          ADIR=ABS(D)
+          IRK=1
+          if (I < 2) then ! first step make only in real direction
+              CX=REALPART(D)/REALPART(DX)
+          else
+              CX=D/DX
+          end if
+          CX=CX*X/(2*CX+X)
+          irk_loop: do
+              X=X-CX
+              OME=(X*XA)**2
+              FPX=PFQ/OME
+              DO  J=1,JMA
+                  XP(J)=DN(J)/DEK/REN(J)/OME
+                  XX(J)=X*REN(J)
+              end do
+              CALL DIFU(2,JMA,IERR)
+              if (printDebugInfo) &
+                  & write(*,'(I2,A ,I2 ,A,2E16.8,A,2E16.8 ,A,2E16.8,A,2E16.8)')&
+                            & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX ! DEBUG
+              IF(IERR.NE.0) then
+                  solutionIsTooHeavilyDamped = .true.
+                  exit iteration_loop
+              end if
+              IF(ABS(D).LT.ADIR) then
+                  if( (ABS(CX).LE.1.E-6*ABS(X)) &    ! relative frequency precision
+                      & .or. (ABS(CX) < 1e-6) ) then ! absolute precision
+                      rootFindingConverged = .true.
+                      if (I >= 2) then ! at least 2 steps have been made
+                          exit iteration_loop
+                      else
+                          cycle iteration_loop
+                      end if
+                  else
+                      cycle iteration_loop
+                  end if 
+              else
+                  X=X+CX
+                  CX=CX/2.
+                  if (IRK > 3) then ! check for sitting at local minima
+                      if ((ABS(D)-ADIR)/ADIR<1e-5) then
+                          rootFindingConverged = .false.
+                          exit iteration_loop
+                      end if
+                  end if
+                  IRK=IRK+1
+                  IF(IRK.GT.maxIterations) exit iteration_loop
+              end if
+          end do irk_loop
+      end do iteration_loop
+  end subroutine
 end program WHAMP
