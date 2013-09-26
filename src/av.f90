@@ -28,7 +28,7 @@ SUBROUTINE AV
   integer, parameter :: d2p=kind(1.0d0)
   integer :: I,IB,IERR,J,K
   real(kind=d2p) :: coef,ENFLUXZ,ENFLUXP,ENDEN,ENFIELD,Q 
-  COMPLEX(kind=d2p) :: A,B
+  REAL(kind=d2p) :: A,B
   COMPLEX(kind=d2p) :: XSI(6,4), DF, U1, U2, U3, U12, U13, U32
   COMPLEX(kind=d2p) :: ERG, DDER(3,3), EE(6,4)
   COMPLEX(kind=d2p) :: POYN(3),ENFLZ,ENFLP,DEP(3,3),DEZ(3,3)
@@ -49,8 +49,8 @@ SUBROUTINE AV
   POYN(3)=real(efl(1)*conjg(bfl(2))-efl(2)*conjg(bfl(1)))*coef
 
   ! *** calculate energy in fields
-  A=EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3))    
-  B=BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3))
+  A=REAL(EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3))) 
+  B=REAL(BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3)))
   ENFIELD=1.0+B/A*299.79*299.79
 
   ! *** Loop through all species
@@ -126,7 +126,7 @@ iteration_loop:  do
         end DO
      end DO
      !
-     ENDEN=ERG*CONJG(ERG)/(ERG+CONJG(ERG))*2.0-ENFIELD
+     ENDEN=REAL(ERG*CONJG(ERG)/(ERG+CONJG(ERG)))*2.0-ENFIELD
 
      !
      DEZ(1,1)=EE(1,3)
@@ -159,8 +159,8 @@ iteration_loop:  do
         end DO
      end DO
 
-     ENFLUXZ=ENFLZ*CONJG(ENFLZ)/(ENFLZ+CONJG(ENFLZ))*2.0
-     ENFLUXP=ENFLP*CONJG(ENFLP)/(ENFLP+CONJG(ENFLP))*2.0
+     ENFLUXZ=REAL(ENFLZ*CONJG(ENFLZ)/(ENFLZ+CONJG(ENFLZ)))*2.0
+     ENFLUXP=REAL(ENFLP*CONJG(ENFLP)/(ENFLP+CONJG(ENFLP)))*2.0
 
      A=2.9979e8/CV*8.8542e-12/4.0
      ENFLUXZ=-ENFLUXZ*real(X)/Z*A

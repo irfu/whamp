@@ -40,7 +40,7 @@ SUBROUTINE RINT(YY,AL,RC)
      SIG=1.
   END IF
   YA=DIMAG(Y)
-  YR=Y
+  YR=real(Y)
   UL=PI-2.8d0*Y/(36.d0+Y)
   COT=COS(PI*Y)/SIN(PI*Y)
   D=PI*(1.d0+COT**2)

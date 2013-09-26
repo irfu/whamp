@@ -6,9 +6,10 @@ PROGRAM WHAMP
   use comin
   use comcout
   implicit none
-  integer, parameter :: d2p=kind(1.0d0)
+  !integer, parameter :: d2p=kind(1.0d0)
+  integer, parameter :: d2p=8
 
-  integer :: I,IERR,IRK,ISP,J,KFS
+  integer :: I,IERR,IRK,J,KFS
   logical :: rootFindingConverged 
   logical :: solutionIsTooHeavilyDamped
   logical :: isChangedPlasmaModel
@@ -16,11 +17,8 @@ PROGRAM WHAMP
   real(kind=d2p) :: RED,REN, RN, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   CHARACTER FILENAME*(80)
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP,CX
-  DIMENSION REN(10),T(10),ST(10),ISP(10)
-  CHARACTER SPE(5)*3
+  DIMENSION REN(10),T(10),ST(10)
 
-  DATA SPE/'E- ','H+ ','HE+','O+ ','   '/
-  
   CALL READ_INPUT_FILE(FILENAME)
   !
   IERR=0
@@ -33,12 +31,10 @@ PROGRAM WHAMP
         REN(J)=1836.1*ASS(J)
         IF(REN(J).EQ.0.) REN(J)=1.
         T(J)=TA(J)/TA(1)
-        ISP(J)=SQRT(ASS(J))
-        IF(ISP(J).LT.4) ISP(J)=ISP(J)+1
         IF(DN(J).EQ.0.) cycle species_loop
         JMA=J
         RED=RED+DN(J)/REN(J)
-        IF( ISP(J).EQ.1.) DEN=DEN+DN(J)
+        IF( ASS(J).EQ.0.) DEN=DEN+DN(J)
      end do species_loop
      !
      RN=REN(1)
@@ -104,9 +100,9 @@ PROGRAM WHAMP
               CALL DIFU(4,JMA,IERR)
               !
               XI=DIMAG(X)
-              VG(1)=-DP/DX
-              VG(2)=-DZ/DX
-              RI=SQRT(P**2+Z**2)*CV/X
+              VG(1)=-real(DP/DX)
+              VG(2)=-real(DZ/DX)
+              RI=SQRT(P**2+Z**2)*CV/real(X)  ! refractive index
               IF(VG(1).NE.0.) SG(1)=XI/VG(1)
               IF(VG(2).NE.0.) SG(2)=XI/VG(2)
               !          ****  PRINT THE RESULTS.  ****
@@ -190,7 +186,7 @@ PROGRAM WHAMP
      DO  J=1,JMA
 102     FORMAT('# ',  A3,  '  DN=',1PE12.5,  '  T=',0PF9.5,  '  D=',  F4.2,&
              &'  A=',  F4.2,  '  B=',  F4.2,  ' VD=',  F5.2)
-        PRINT 102,SPE(ISP(J)),DN(J),TA(J),DD(J),AA(J,1),AA(J,2),VD(J)
+        PRINT 102,species_symbol(ASS(J)),DN(J),TA(J),DD(J),AA(J,1),AA(J,2),VD(J)
      end do
      !
   end subroutine
@@ -252,4 +248,21 @@ PROGRAM WHAMP
           end do irk_loop
       end do iteration_loop
   end subroutine
+  pure function species_symbol(mass) result(symbol)
+          real(kind=d2p),intent(in) :: mass
+          character(5)   :: symbol
+          if (mass==0) then
+              symbol = 'e-'
+          else if (mass==1) then
+              symbol = 'H+'
+          else if (mass==2) then
+              symbol = 'He++'
+          else if (mass==4) then
+              symbol = 'He+'
+          else if (mass==16) then
+              symbol = 'O+'
+          else
+             write(symbol,'(a,I3)') 'm=',mass 
+          endif
+  end function
 end program WHAMP

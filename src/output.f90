@@ -92,8 +92,8 @@ output_loop: do
         case('Y','y') ! Y
             CALL AV
         case('H','h') !H
-            dle=EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3))    
-            dlb=BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3))
+            dle=real(EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3)))
+            dlb=real(BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3)))
             dla=sqrt(dle/dlb)
             WRITE(*,782)  dla
             782        FORMAT(' E/B= ',E9.3,' ',$)
