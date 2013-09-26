@@ -208,7 +208,7 @@ PROGRAM WHAMP
           else
               CX=D/DX
           end if
-          CX=CX*X/(2*CX+X)
+          CX=CX*X/(2*CX+X) ! finding zero of (w^2 D), faster convergence
           irk_loop: do
               X=X-CX
               OME=(X*XA)**2
