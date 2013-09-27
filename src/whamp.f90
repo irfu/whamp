@@ -13,11 +13,15 @@ PROGRAM WHAMP
   logical :: rootFindingConverged 
   logical :: solutionIsTooHeavilyDamped
   logical :: isChangedPlasmaModel
-  real(kind=d2p) :: ADIR,DEK,DEN,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
-  real(kind=d2p) :: RED,REN, RN, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
+  real(kind=d2p) :: DEN        ! total electron density
+  real(kind=d2p) :: REN(10)    ! particle mass expressed in masses of first particles
+  real(kind=d2p) :: RN         ! mass of first particle in electron masses
+  real(kind=d2p) :: ADIR       ! abs(D)
+  real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
+  real(kind=d2p) :: RED, RN, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   CHARACTER FILENAME*(80)
-  COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP,CX
-  DIMENSION REN(10),T(10),ST(10)
+  COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
+  DIMENSION T(10),ST(10)
 
   CALL READ_INPUT_FILE(FILENAME)
   !
@@ -34,7 +38,7 @@ PROGRAM WHAMP
         IF(DN(J).EQ.0.) cycle species_loop
         JMA=J
         RED=RED+DN(J)/REN(J)
-        IF( ASS(J).EQ.0.) DEN=DEN+DN(J)
+        IF( ASS(J).EQ.0.) DEN=DEN+DN(J) 
      end do species_loop
      !
      RN=REN(1)
@@ -191,7 +195,16 @@ PROGRAM WHAMP
      !
   end subroutine
   subroutine root_finding
+      ! Newton's iteration method with small adjustments:
+      ! 1) First 2 steps are taken only along real direction to avoid
+      ! convergence to some large imaginary frequency solutions
+      ! 2) find roots of (w^2 D) instead of D, thus making slightly faster
+      ! convergence
+      ! 3) convergence criteria both on relative and absolute size of CX and on
+      ! relative change in D
       integer(kind=4),parameter :: maxIterations=50
+      complex(kind=d2p) :: CX ! correction in Newton's iteration method
+      
       CALL DIFU(2,JMA,IERR)
       IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
       !                  ****  START OF ITERATION.  ****

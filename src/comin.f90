@@ -8,10 +8,10 @@ integer :: JMA             ! the number of last plasma species with non-zero den
 real(kind=d2p) :: PP(10)   ! ??
 real(kind=d2p) :: ZZ(10)   ! ??
 real(kind=d2p) :: AA(10,2) ! alpha parameters in distribution function
-real(kind=d2p) :: DD(10)   !
-real(kind=d2p) :: ASS(10)  ! mass of components
-real(kind=d2p) :: VD(10)   ! drift velocity 
-real(kind=d2p) :: DN(10)   ! density of each plasma component cm^-3
+real(kind=d2p) :: DD(10)   ! Delta_j in distribution function
+real(kind=d2p) :: ASS(10)  ! particle mass in unit of mp, if 0 then use e- mass
+real(kind=d2p) :: VD(10)   ! drift velocity normalized against parallel thermal velocity
+real(kind=d2p) :: DN(10)   ! number density of each plasma component cm^-3
 real(kind=d2p) :: TA(10)   ! temperature in keV
 real(kind=d2p) :: CV       ! speed of light / thermal velocity of 1st species
 real(kind=d2p) :: PM(3)    ! array (pmin,pmax,pstep)
@@ -21,7 +21,7 @@ real(kind=d2p) :: XC       ! XC  - gyrofrequency (kHZ)
 real(kind=d2p) :: PZL      ! option L, =0 linear input, =1 logarythmic input of P and Z
 
 complex(kind=d2p) :: XX(10)
-complex(kind=d2p) :: XP(10) 
+complex(kind=d2p) :: XP(10) ! wpj^2/w^2
 
 logical        :: printDebugInfo=.false.
 end module comin

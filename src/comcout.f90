@@ -10,7 +10,7 @@ complex(kind=d2p) :: D      ! dispersion function
 complex(kind=d2p) :: DX     ! D derivative wrt frequency
 complex(kind=d2p) :: DZ     ! D derivative wrt Z
 complex(kind=d2p) :: DP     ! D derivative wrt P
-complex(kind=d2p) :: E(6,4) ! ??
+complex(kind=d2p) :: E(6,4) ! epsilon and its derivatives x eps_x, z eps_z, p eps_p
       
 real(kind=d2p) :: P
 real(kind=d2p) :: Z
