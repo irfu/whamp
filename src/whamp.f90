@@ -18,7 +18,7 @@ PROGRAM WHAMP
   real(kind=d2p) :: RN         ! mass of first particle in electron masses
   real(kind=d2p) :: ADIR       ! abs(D)
   real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
-  real(kind=d2p) :: RED, RN, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
+  real(kind=d2p) :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   CHARACTER FILENAME*(80)
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
   DIMENSION T(10),ST(10)
