@@ -1,4 +1,4 @@
-PROGRAM WHAMP_ENGINE
+SUBROUTINE WHAMP_ENGINE
   use comin
   use comcout
   use comoutput
@@ -270,11 +270,14 @@ PROGRAM WHAMP_ENGINE
           elseif (size(PM) == 3) then ! vector
               perpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(PM(3),1.0d0)/PM(3))
               allocate (kperpOUT(perpSize))
+              kperpOUT=(PM(1):PM(3):PM(2))
           end if
           if (size(ZM) == 1) then ! scalar
               parSize = 1
+              kparOUT = ZM
           elseif (size(ZM) == 3) then ! vector
               parSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(ZM(3),1.0d0)/ZM(3))
+              kparOUT=(ZM(1):ZM(3):ZM(2))
           end if
           allocate (fOUT(perpSize,parSize))
           allocate (ExOUT(perpSize,parSize))
