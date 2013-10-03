@@ -29,8 +29,8 @@ C     mexFunction arguments:
  
 C     Function declarations:
       mwPointer mxCreateDoubleMatrix, mxGetPr
-      integer mxIsNumeric
-      mwPointer mxGetM, mxGetN
+      mwPointer, external :: mxIsComplex, mxIsNumeric
+      mwPointer, external ::  mxGetM, mxGetN
  
 C     Pointers to input/output mxArrays:
       mwPointer x_pr, y_pr
@@ -56,7 +56,8 @@ C     Check for proper number of arguments.
       endif
 
 C      x_pr = mxGetPr(prhs(1))
-      call mxCopyPtrToReal8(mxGetPr(prhs(1)),XC,inputSize(1))
+      call input_size(1)
+      call mxCopyPtrToReal8(mxGetPr(prhs(1)),XC,size)
 
 
 
@@ -69,7 +70,7 @@ C     Create matrix for the return argument.
 C     Set input using comin
 
 C     Call the computational subroutine.
-      call matsq(y, x, m, n)
+      !call matsq(y, x, m, n)
 
 C     Set output using comoutput
 
@@ -80,7 +81,7 @@ C     Load the data into y_pr, which is the output to MATLAB.
       return
 
       contains
-      subroutine inputSize(ind)
+      subroutine input_size(ind)
       integer ind
 C     Get the size of the input array.
       m = mxGetM(prhs(ind))
@@ -99,29 +100,11 @@ C     Check that the array is numeric (not strings).
      +                           'Input must be a numeric array.')
       endif
 
-      end !inputSize
+      end !input_size
       
-      end
-
-
       end
 
 C-----------------------------------------------------------------------
 C     Set whamp input
 
 
-
-C-----------------------------------------------------------------------
-C     Computational routine
-
-      subroutine matsq(y, x, m, n)
-      mwSize m, n, i, j
-      real*8 x(m,n), y(m,n)
-C     
-      do 20 i=1,m
-         do 10 j=1,n
-            y(i,j)= x(i,j)**2
- 10      continue
- 20   continue
-      return
-      end
