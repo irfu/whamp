@@ -147,9 +147,6 @@ output_loop: do
             PRINT 6
             PRINT 31, XX, PP ,ZZ
             31         FORMAT( 1P, ' XX=',12E12.3/' PP=',6E12.3/' ZZ=',6E12.3/)
-        case('W','w') ! W
-            CALL WRFI(0)
-            IF(IOU(1:5).EQ.'W    ')RETURN
         case(' ') ! ignore spaces
         case default
             write(*,*) 'Unknown output request:',IC
@@ -180,8 +177,6 @@ output_format_loop: do
             IOU(K:K)=' '
         case default ! any character
             KMX=K
-            !IF(IC.EQ.'W'.OR.IC.EQ.'w')CALL WRFI(2) ! WDF reconectroctions, dump
-            !to file
         end select
     end do
     exit output_format_loop

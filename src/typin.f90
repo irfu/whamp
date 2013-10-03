@@ -45,7 +45,6 @@ SUBROUTINE TYPIN(NPL,KFS)
   flag_success_reading=0 ! default value that did not succeed to read the line
   input_loop: do 
      input_variable=' ' ! default emppty
-     call wrfi(3)
      IOS = 1
 
      do
@@ -283,7 +282,6 @@ SUBROUTINE TYPIN(NPL,KFS)
      exit input_loop
   end do input_loop
 
-  !     IF(IOUT*NEW.EQ.1)CALL WRFI(1)
   IF(IOUT.NE.1) CALL INOUT
   IOUT=1
   RETURN

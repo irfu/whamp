@@ -263,6 +263,7 @@ SUBROUTINE WHAMP_ENGINE
           ! estimate the size of matrices
           integer :: perpSize
           integer :: parSize
+          integer :: i
           if (size(PM) == 1) then ! scalar
               perpSize = 1
               allocate (kperpOUT(1))
@@ -270,14 +271,19 @@ SUBROUTINE WHAMP_ENGINE
           elseif (size(PM) == 3) then ! vector
               perpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(PM(3),1.0d0)/PM(3))
               allocate (kperpOUT(perpSize))
-              kperpOUT=(PM(1):PM(3):PM(2))
+              do i=1,perpSize
+                  kperpOUT(i) = PM(1)+(i-1.0)*PM(3)
+              end do
           end if
           if (size(ZM) == 1) then ! scalar
               parSize = 1
               kparOUT = ZM
           elseif (size(ZM) == 3) then ! vector
               parSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(ZM(3),1.0d0)/ZM(3))
-              kparOUT=(ZM(1):ZM(3):ZM(2))
+              allocate (kparOUT(parSize))
+              do i=1,parSize
+                  kparOUT(i) = ZM(1)+(i-1.0)*ZM(3)
+              end do
           end if
           allocate (fOUT(perpSize,parSize))
           allocate (ExOUT(perpSize,parSize))
@@ -316,6 +322,17 @@ SUBROUTINE WHAMP_ENGINE
           if (rootFindingConverged) then 
               flagSolutionFoundOUT(indexKperp,indexKpar) = 1
               fOUT(indexKperp,indexKpar) = X
+              ExOUT(indexKperp,indexKpar) = EFL(1) 
+              EyOUT(indexKperp,indexKpar) = EFL(2) 
+              EyOUT(indexKperp,indexKpar) = EFL(3) 
+              BxOUT(indexKperp,indexKpar) = BFL(1) 
+              ByOUT(indexKperp,indexKpar) = BFL(2) 
+              ByOUT(indexKperp,indexKpar) = BFL(3) 
+              VGPOUT(indexKperp,indexKpar) = VG(1) 
+              VGZOUT(indexKperp,indexKpar) = VG(2) 
+              SGPOUT(indexKperp,indexKpar) = SG(1) 
+              SGZOUT(indexKperp,indexKpar) = SG(2) 
+              uOUT(indexKperp,indexKpar) = ENE
           elseif (solutionIsTooHeavilyDamped) then
               flagTooHeavilyDampedOUT(indexKperp,indexKpar) = 1
           else
@@ -339,4 +356,4 @@ SUBROUTINE WHAMP_ENGINE
              write(symbol,'(a,I3)') 'm=',mass 
           endif
   end function
-end program WHAMP_ENGINE
+end subroutine WHAMP_ENGINE
