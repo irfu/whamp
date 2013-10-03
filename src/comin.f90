@@ -24,6 +24,8 @@ complex(kind=d2p) :: XX(10)
 complex(kind=d2p) :: XP(10) ! wpj^2/w^2
 
 logical        :: printDebugInfo=.false.
+
+integer        :: zfirst   ! which direction vary first (KFS in WHAMP) ?? how to handle
 end module comin
 
 

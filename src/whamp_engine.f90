@@ -1,10 +1,7 @@
-!**************************************************************
-!
-! File whamp.f 
-!       SUBROUTINE WHAMP(IREAD_FILE, FILENAME)
-PROGRAM WHAMP 
+PROGRAM WHAMP_ENGINE
   use comin
   use comcout
+  use comoutput
   implicit none
   !integer, parameter :: d2p=kind(1.0d0)
   integer, parameter :: d2p=8
@@ -12,59 +9,23 @@ PROGRAM WHAMP
   integer :: I,IERR,IRK,J,KFS
   logical :: rootFindingConverged 
   logical :: solutionIsTooHeavilyDamped
-  logical :: isChangedPlasmaModel
   real(kind=d2p) :: DEN        ! total electron density
   real(kind=d2p) :: REN(10)    ! particle mass expressed in masses of first particles
   real(kind=d2p) :: RN         ! mass of first particle in electron masses
   real(kind=d2p) :: ADIR       ! abs(D)
   real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
   real(kind=d2p) :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
-  CHARACTER FILENAME*(80)
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
   DIMENSION T(10),ST(10)
 
-  CALL READ_INPUT_FILE(FILENAME)
+  !CALL READ_INPUT_FILE(FILENAME)
   !
   IERR=0
 
-  plasma_update_loop: do
-     isChangedPlasmaModel = .false. ! changed to .true. in code when new plasma parameters are entered
-     DEN=0.d+0
-     RED=0.d+0
-     species_loop: DO J=1,10
-        REN(J)=1836.1*ASS(J)
-        IF(REN(J).EQ.0.) REN(J)=1.
-        T(J)=TA(J)/TA(1)
-        IF(DN(J).EQ.0.) cycle species_loop
-        JMA=J
-        RED=RED+DN(J)/REN(J)
-        IF( ASS(J).EQ.0.) DEN=DEN+DN(J) 
-     end do species_loop
-     !
-     RN=REN(1)
-     !                  ****  NORMALIZED TEMPERATURES AND VELOCITIES.  ****
-     DO J=1,JMA
-        REN(J)=REN(J)/RN
-        T(J)=T(J)*REN(J)
-        ST(J)=SQRT(T(J))
-     end do
-     !
-     DEK=12405._d2p
-     PFQ=RED/DEK
-     PX=SQRT(PFQ)
-     XA=XC/RN
-     TR=TA(1)/RN
-     CV=TR*(1022._d2p+TR)/(511._d2p+TR)**2
-     CV=1./SQRT(CV)
-     DEK=DEK*RN
-     !
-     call print_plasma_parameters()
-     !                  ****  ASK FOR INPUT!  **** 
+  call allocate_output_matrices
+  call plasma_setup
+  call input_setup
      typin_loop: do 
-        !for new plasma skip calling typin until convergence checked
-        if(.not.isChangedPlasmaModel) call  TYPIN(isChangedPlasmaModel,KFS) 
-        if(isChangedPlasmaModel)      cycle plasma_update_loop
-        isChangedPlasmaModel = .false.
         KV=1
         PLG=PM(1)
         IF(PM(3).LT.0.) PLG=PM(2)
@@ -110,7 +71,8 @@ PROGRAM WHAMP
               IF(VG(1).NE.0.) SG(1)=XI/VG(1)
               IF(VG(2).NE.0.) SG(2)=XI/VG(2)
               !          ****  PRINT THE RESULTS.  ****
-              CALL OUTPT
+              !              CALL OUTPT
+              call save_output
               PO=P
               ZO=Z
               XO=X
@@ -130,7 +92,7 @@ PROGRAM WHAMP
               PRINT*,' TOO HEAVILY DAMPED!'
               PRINT*,'   '
               IERR=0
-              CALL OUTPT
+              !CALL OUTPT
               IF(KFS .EQ. 1) PLG = 1.D99
               IF(KFS .EQ. 2) ZLG = 1.D99
            end if
@@ -179,7 +141,6 @@ PROGRAM WHAMP
            end if
         end do z_p_loop
      end do typin_loop
-  end do plasma_update_loop
   contains
   subroutine print_plasma_parameters
  !                  ****  PRINT PLASMA PARAMETERS.  ****
@@ -193,6 +154,43 @@ PROGRAM WHAMP
         PRINT 102,species_symbol(ASS(J)),DN(J),TA(J),DD(J),AA(J,1),AA(J,2),VD(J)
      end do
      !
+  end subroutine
+  subroutine plasma_setup
+          DEN=0.d+0
+          RED=0.d+0
+          species_loop: DO J=1,10
+              REN(J)=1836.1*ASS(J)
+              IF(REN(J).EQ.0.) REN(J)=1.
+              T(J)=TA(J)/TA(1)
+              IF(DN(J).EQ.0.) cycle species_loop
+              JMA=J
+              RED=RED+DN(J)/REN(J)
+              IF( ASS(J).EQ.0.) DEN=DEN+DN(J) 
+          end do species_loop
+          !
+          RN=REN(1)
+          !                  ****  NORMALIZED TEMPERATURES AND VELOCITIES.  ****
+          DO J=1,JMA
+              REN(J)=REN(J)/RN
+              T(J)=T(J)*REN(J)
+              ST(J)=SQRT(T(J))
+          end do
+          !
+          DEK=12405._d2p
+          PFQ=RED/DEK
+          PX=SQRT(PFQ)
+          XA=XC/RN
+          TR=TA(1)/RN
+          CV=TR*(1022._d2p+TR)/(511._d2p+TR)**2
+          CV=1./SQRT(CV)
+          DEK=DEK*RN
+          !
+          call print_plasma_parameters()
+          !
+  end subroutine
+  subroutine input_setup
+          KFS = zfirst
+
   end subroutine
   subroutine root_finding
       ! Newton's iteration method with small adjustments:
@@ -261,6 +259,66 @@ PROGRAM WHAMP
           end do irk_loop
       end do iteration_loop
   end subroutine
+  subroutine allocate_output_matrices
+          ! estimate the size of matrices
+          integer :: perpSize
+          integer :: parSize
+          if (size(PM) == 1) then ! scalar
+              perpSize = 1
+              allocate (kperpOUT(1))
+              kperpOUT = PM
+          elseif (size(PM) == 3) then ! vector
+              perpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(PM(3),1.0d0)/PM(3))
+              allocate (kperpOUT(perpSize))
+          end if
+          if (size(ZM) == 1) then ! scalar
+              parSize = 1
+          elseif (size(ZM) == 3) then ! vector
+              parSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(ZM(3),1.0d0)/ZM(3))
+          end if
+          allocate (fOUT(perpSize,parSize))
+          allocate (ExOUT(perpSize,parSize))
+          allocate (EyOUT(perpSize,parSize))
+          allocate (EzOUT(perpSize,parSize))
+          allocate (BxOUT(perpSize,parSize))
+          allocate (ByOUT(perpSize,parSize))
+          allocate (BzOUT(perpSize,parSize))
+          allocate (SxOUT(perpSize,parSize))
+          allocate (SyOUT(perpSize,parSize))
+          allocate (SzOUT(perpSize,parSize))
+          allocate (EBOUT(perpSize,parSize))
+          allocate (VGPOUT(perpSize,parSize))
+          allocate (VGZOUT(perpSize,parSize))
+          allocate (SGPOUT(perpSize,parSize))
+          allocate (SGZOUT(perpSize,parSize))
+          allocate (uOUT(perpSize,parSize))
+          allocate (flagSolutionFoundOUT(perpSize,parSize))
+          allocate (flagTooHeavilyDampedOUT(perpSize,parSize))
+          allocate (flagNoConvergenceOUT(perpSize,parSize))
+          flagSolutionFoundOUT = 0
+  end subroutine
+  subroutine save_output
+          integer :: indexKperp, indexKpar
+          if (PLG == PM(1)) then
+              indexKperp = 1
+          else
+              indexKperp = 1 + nint((PLG-PM(1))/PM(3))
+          endif
+          if (ZLG == ZM(1)) then
+              indexKpar = 1
+          else
+              indexKpar = 1 + nint((ZLG-ZM(1))/ZM(3))
+          endif
+
+          if (rootFindingConverged) then 
+              flagSolutionFoundOUT(indexKperp,indexKpar) = 1
+              fOUT(indexKperp,indexKpar) = X
+          elseif (solutionIsTooHeavilyDamped) then
+              flagTooHeavilyDampedOUT(indexKperp,indexKpar) = 1
+          else
+              flagNoConvergenceOUT(indexKperp,indexKpar) = 1
+          endif
+  end subroutine
   pure function species_symbol(mass) result(symbol)
           real(kind=d2p),intent(in) :: mass
           character(5)   :: symbol
@@ -278,4 +336,4 @@ PROGRAM WHAMP
              write(symbol,'(a,I3)') 'm=',mass 
           endif
   end function
-end program WHAMP
+end program WHAMP_ENGINE
