@@ -2,6 +2,7 @@ module comoutput
 implicit none
 !integer, parameter,private :: d2p=kind(1.0d0)
 integer, parameter,private :: d2p=8
+integer  :: kperpSize, kparSize
 
 real(kind=d2p),allocatable :: kperpOUT(:) ! ???? should those be matrices or vectors?
 real(kind=d2p),allocatable :: kparOUT(:)

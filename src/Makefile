@@ -9,12 +9,13 @@
 FTN  = gfortran
 LD   = gfortran
 CC   = /bin/cc -Ae
+AR   = ar r
 BINDIR = .
 # BINDIR = ~/bin
 
 FFLAGS = -c -Wall
 
-all: whamp 
+all: whamp whampengine
 
 %.o: %.f90
 	$(FTN) $(FFLAGS) $<
@@ -42,6 +43,9 @@ comoutput.o: comoutput.f90
 
 whamp:  ${OBJS} 
 	${LD}  ${OBJS} -o ${BINDIR}/whamp
+
+whampengine: ${OBJS}
+	${AR} libwhamp.a whamp_engine.o comin.o comoutput.o comcout.o difu.o xsi.o energy.o ryla.o rtay.o rasy.o rint.o
 
 energy.o  output.o  difu.o: comcout.o
 xsi.o   output.o  difu.o: comin.o

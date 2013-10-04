@@ -206,7 +206,7 @@ SUBROUTINE WHAMP_ENGINE
       CALL DIFU(2,JMA,IERR)
       IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
       !                  ****  START OF ITERATION.  ****
-      if (printDebugInfo) write(*,*) 'START:','. X=',X,'D=',D,'DX=',DX ! DEBUG
+      !if (printDebugInfo) write(*,*) 'START:','. X=',X,'D=',D,'DX=',DX ! DEBUG
       iteration_loop: DO I=1,maxIterations
           ADIR=ABS(D)
           IRK=1
@@ -225,9 +225,9 @@ SUBROUTINE WHAMP_ENGINE
                   XX(J)=X*REN(J)
               end do
               CALL DIFU(2,JMA,IERR)
-              if (printDebugInfo) &
-                  & write(*,'(I2,A ,I2 ,A,2E16.8,A,2E16.8 ,A,2E16.8,A,2E16.8)')&
-                            & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX ! DEBUG
+              !if (printDebugInfo) &
+              !    & write(*,'(I2,A ,I2 ,A,2E16.8,A,2E16.8 ,A,2E16.8,A,2E16.8)')&
+              !              & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX ! DEBUG
               IF(IERR.NE.0) then
                   solutionIsTooHeavilyDamped = .true.
                   exit iteration_loop
@@ -261,49 +261,47 @@ SUBROUTINE WHAMP_ENGINE
   end subroutine
   subroutine allocate_output_matrices
           ! estimate the size of matrices
-          integer :: perpSize
-          integer :: parSize
           integer :: i
           if (size(PM) == 1) then ! scalar
-              perpSize = 1
+              kperpSize = 1
               allocate (kperpOUT(1))
               kperpOUT = PM
           elseif (size(PM) == 3) then ! vector
-              perpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(PM(3),1.0d0)/PM(3))
-              allocate (kperpOUT(perpSize))
-              do i=1,perpSize
+              kperpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(PM(3),1.0d0)/PM(3))
+              allocate (kperpOUT(kperpSize))
+              do i=1,kperpSize
                   kperpOUT(i) = PM(1)+(i-1.0)*PM(3)
               end do
           end if
           if (size(ZM) == 1) then ! scalar
-              parSize = 1
+              kparSize = 1
               kparOUT = ZM
           elseif (size(ZM) == 3) then ! vector
-              parSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(ZM(3),1.0d0)/ZM(3))
-              allocate (kparOUT(parSize))
-              do i=1,parSize
+              kparSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(ZM(3),1.0d0)/ZM(3))
+              allocate (kparOUT(kparSize))
+              do i=1,kparSize
                   kparOUT(i) = ZM(1)+(i-1.0)*ZM(3)
               end do
           end if
-          allocate (fOUT(perpSize,parSize))
-          allocate (ExOUT(perpSize,parSize))
-          allocate (EyOUT(perpSize,parSize))
-          allocate (EzOUT(perpSize,parSize))
-          allocate (BxOUT(perpSize,parSize))
-          allocate (ByOUT(perpSize,parSize))
-          allocate (BzOUT(perpSize,parSize))
-          allocate (SxOUT(perpSize,parSize))
-          allocate (SyOUT(perpSize,parSize))
-          allocate (SzOUT(perpSize,parSize))
-          allocate (EBOUT(perpSize,parSize))
-          allocate (VGPOUT(perpSize,parSize))
-          allocate (VGZOUT(perpSize,parSize))
-          allocate (SGPOUT(perpSize,parSize))
-          allocate (SGZOUT(perpSize,parSize))
-          allocate (uOUT(perpSize,parSize))
-          allocate (flagSolutionFoundOUT(perpSize,parSize))
-          allocate (flagTooHeavilyDampedOUT(perpSize,parSize))
-          allocate (flagNoConvergenceOUT(perpSize,parSize))
+          allocate (fOUT(kperpSize,kparSize))
+          allocate (ExOUT(kperpSize,kparSize))
+          allocate (EyOUT(kperpSize,kparSize))
+          allocate (EzOUT(kperpSize,kparSize))
+          allocate (BxOUT(kperpSize,kparSize))
+          allocate (ByOUT(kperpSize,kparSize))
+          allocate (BzOUT(kperpSize,kparSize))
+          allocate (SxOUT(kperpSize,kparSize))
+          allocate (SyOUT(kperpSize,kparSize))
+          allocate (SzOUT(kperpSize,kparSize))
+          allocate (EBOUT(kperpSize,kparSize))
+          allocate (VGPOUT(kperpSize,kparSize))
+          allocate (VGZOUT(kperpSize,kparSize))
+          allocate (SGPOUT(kperpSize,kparSize))
+          allocate (SGZOUT(kperpSize,kparSize))
+          allocate (uOUT(kperpSize,kparSize))
+          allocate (flagSolutionFoundOUT(kperpSize,kparSize))
+          allocate (flagTooHeavilyDampedOUT(kperpSize,kparSize))
+          allocate (flagNoConvergenceOUT(kperpSize,kparSize))
           flagSolutionFoundOUT = 0
   end subroutine
   subroutine save_output
@@ -353,7 +351,7 @@ SUBROUTINE WHAMP_ENGINE
           else if (mass==16) then
               symbol = 'O+'
           else
-             write(symbol,'(a,I3)') 'm=',mass 
+             !write(symbol,'(a,I3)') 'm=',mass 
           endif
   end function
 end subroutine WHAMP_ENGINE
