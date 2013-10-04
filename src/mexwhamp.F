@@ -29,6 +29,7 @@ C     mexFunction arguments:
  
 C     Function declarations:
       mwPointer mxCreateDoubleMatrix, mxGetPr
+!      mwPointer, external ::  mxCreateDoubleMatrix, mxGetPr
       mwPointer, external :: mxIsComplex, mxIsNumeric
       mwPointer, external ::  mxGetM, mxGetN
  
@@ -47,25 +48,27 @@ C     Maximum size = numel
  
 C-----------------------------------------------------------------------
 C     Check for proper number of arguments. 
-      if(nrhs .ne. 12) then
+      if(nrhs .ne. 1) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nInput',
      +                           'One input required.')
-      elseif(nlhs .ne. 21) then
+      elseif(nlhs .ne. 1) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nOutput',
      +                           'One output required.')
       endif
 
 C      x_pr = mxGetPr(prhs(1))
       call input_size(1)
-      call mxCopyPtrToReal8(mxGetPr(prhs(1)),XC,size)
+      call mxCopyPtrToReal8(mxGetPr(prhs(1)),DN,size)
 
 
 
 C     Create matrix for the return argument.
-      plhs(1) = mxCreateDoubleMatrix(m,n,0)
-      x_pr = mxGetPr(prhs(1))
+C      plhs(1) = mxCreateDoubleMatrix(m,n,0)
+C      plhs(1) = mxCreateDoubleMatrix(1,10,0)
+      plhs(1) = mxCreateDoubleMatrix(1,10,1)
+C      x_pr = mxGetPr(prhs(1))
       y_pr = mxGetPr(plhs(1))
-      call mxCopyPtrToReal8(x_pr,x,size)
+C      call mxCopyPtrToReal8(x_pr,x,size)
 
 C     Set input using comin
 
@@ -76,7 +79,7 @@ C     Set output using comoutput
 
 
 C     Load the data into y_pr, which is the output to MATLAB.
-      call mxCopyReal8ToPtr(y,y_pr,size)     
+      call mxCopyReal8ToPtr(DN,y_pr,10)     
 
       return
 
