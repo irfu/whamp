@@ -28,6 +28,7 @@ PROGRAM WHAMP
         call whamp_engine
         write(*,*) 'PM=',PM
         write(*,*) 'cycleZfirst=',cycleZfirst
+        write(*,*) 'fOUT=',fOUT
      end do typin_loop
   end do plasma_update_loop
   contains
