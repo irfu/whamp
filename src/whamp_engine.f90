@@ -18,6 +18,8 @@ SUBROUTINE WHAMP_ENGINE
   real(kind=d2p) :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
   DIMENSION T(10),ST(10)
+  real(kind=d2p) :: coef_poynt ! coefficient used to simplify Poynting flux estimate
+  real(kind=d2p),parameter :: PI=3.14159265358979_d2p
 
   !CALL READ_INPUT_FILE(FILENAME)
   !
@@ -329,10 +331,19 @@ SUBROUTINE WHAMP_ENGINE
               fOUT(indexKperp,indexKpar) = X
               ExOUT(indexKperp,indexKpar) = EFL(1) 
               EyOUT(indexKperp,indexKpar) = EFL(2) 
-              EyOUT(indexKperp,indexKpar) = EFL(3) 
+              EzOUT(indexKperp,indexKpar) = EFL(3) 
               BxOUT(indexKperp,indexKpar) = BFL(1) 
               ByOUT(indexKperp,indexKpar) = BFL(2) 
-              ByOUT(indexKperp,indexKpar) = BFL(3) 
+              BzOUT(indexKperp,indexKpar) = BFL(3) 
+              !     write Poynting vector uW/m^2
+              coef_poynt = 10.0/4.0/PI/2.0
+              SxOUT(indexKperp,indexKpar) = real(efl(2)*conjg(bfl(3))-efl(3)*conjg(bfl(2)))*coef_poynt
+              SyOUT(indexKperp,indexKpar) = real(efl(3)*conjg(bfl(1))-efl(1)*conjg(bfl(3)))*coef_poynt
+              SzOUT(indexKperp,indexKpar) = real(efl(1)*conjg(bfl(2))-efl(2)*conjg(bfl(1)))*coef_poynt
+              EBOUT(indexKperp,indexKpar) = sqrt( &
+                  & (real(EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3)))) &
+                  & / (real(BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3)))) &
+                  & )
               VGPOUT(indexKperp,indexKpar) = VG(1) 
               VGZOUT(indexKperp,indexKpar) = VG(2) 
               SGPOUT(indexKperp,indexKpar) = SG(1) 

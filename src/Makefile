@@ -58,6 +58,7 @@ whampengine: ${OBJSTEST}
 energy.o  output.o  difu.o: comcout.o
 xsi.o   output.o  difu.o: comin.o
 whamp_engine.o: comoutput.o
+whamptest.o: comoutput.o
 
 clean :
 	rm -f *.mod *.pcl *.pc *.o $(main) *.inc *.vo *.d *~
