@@ -15,7 +15,7 @@ BINDIR = .
 
 FFLAGS = -c -Wall
 
-all: whamp whampengine whamptest
+all: whamp whampengine whampenginetest
 
 %.o: %.f90
 	$(FTN) $(FFLAGS) $<
@@ -33,7 +33,7 @@ OBJS =  energy.o  rint.o\
 
 OBJSTEST =  energy.o  rint.o\
 	rtay.o  xsi.o  output.o  ryla.o\
-	rasy.o  typin.o difu.o   whamptest.o\
+	rasy.o  typin.o difu.o   whamp_engine_test.o\
 	whamp_engine.o comoutput.o\
 	 input.o  ctof.o av.o comin.o comcout.o
 
@@ -49,8 +49,8 @@ comoutput.o: comoutput.f90
 whamp:  ${OBJS} 
 	${LD}  ${OBJS} -o ${BINDIR}/whamp
 
-whamptest:  ${OBJSTEST} 
-	${LD}  ${OBJSTEST} -o ${BINDIR}/whamptest
+whampenginetest:  ${OBJSTEST} 
+	${LD}  ${OBJSTEST} -o ${BINDIR}/whamp_engine_test
 
 whampengine: ${OBJSTEST}
 	${AR} libwhamp.a whamp_engine.o comin.o comoutput.o comcout.o difu.o xsi.o energy.o ryla.o rtay.o rasy.o rint.o 
@@ -58,7 +58,7 @@ whampengine: ${OBJSTEST}
 energy.o  output.o  difu.o: comcout.o
 xsi.o   output.o  difu.o: comin.o
 whamp_engine.o: comoutput.o
-whamptest.o: comoutput.o
+whamp_engine_test.o: comoutput.o
 
 clean :
 	rm -f *.mod *.pcl *.pc *.o $(main) *.inc *.vo *.d *~
