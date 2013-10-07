@@ -13,7 +13,7 @@ AR   = ar r
 BINDIR = .
 # BINDIR = ~/bin
 
-FFLAGS = -c -Wall
+FFLAGS = -c -Wall -fPIC
 
 all: whamp whampengine whampenginetest
 
