@@ -45,7 +45,7 @@ C     Check for proper number of arguments.
       if(nrhs .ne. 12) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nInput',
      +                           'One input required.')
-      elseif(nlhs .ne. 22) then
+      elseif(nlhs .ne. 21) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nOutput',
      +                           'One output required.')
       endif
@@ -195,10 +195,6 @@ C     plhs(1) = mxCreateDoubleMatrix(m,n,0)
       y_pr = mxGetPr(plhs(ind))
       call mxCopyInteger4ToPtr(flagNoConvergenceOUT,y_pr,size)
 
-      ind = 22
-      plhs(ind) = mxCreateDoubleMatrix(1,10,0)
-      y_pr = mxGetPr(plhs(ind))
-      call mxCopyReal8ToPtr(DN,y_pr,10)
       return
 
       contains

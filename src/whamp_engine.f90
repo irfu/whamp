@@ -52,17 +52,10 @@ SUBROUTINE WHAMP_ENGINE
           XP(J)=DN(J)/DEK/REN(J)/OME
       end do
       !
-      solutionIsTooHeavilyDamped = .false. ! default not heaviily damped
+      solutionIsTooHeavilyDamped = .false. ! default not heavily damped
       rootFindingConverged       = .false. ! default no convergence       
       call root_finding
       !
-      if (.not. rootFindingConverged ) then
-          !if (printDebugInfo) PRINT 125,P,Z,X,I,IRK
-          !125           FORMAT(2X,'NO CONVERGENCE!'/'  KP=',F6.3,'  KZ=',&
-          !&  F6.4,'  X=',E12.2,E12.2/'  I=',I3,'  IRK=',I3/)
-          IF(cycleZFirst == 1) PLG = 1.D99 ! end cycling in P
-          IF(cycleZFirst == 2) ZLG = 1.D99 ! end cycling in Z
-      end if
       if ((rootFindingConverged) .AND. (.not.solutionIsTooHeavilyDamped)) then
           !                  ****  CONVERGENCE!  ****
           CALL DIFU(4,JMA,IERR)
@@ -90,6 +83,15 @@ SUBROUTINE WHAMP_ENGINE
               DOP=DP
               KV=0
           end if
+      else
+          call save_output
+      end if
+      if (.not. rootFindingConverged ) then
+          !if (printDebugInfo) PRINT 125,P,Z,X,I,IRK
+          !125           FORMAT(2X,'NO CONVERGENCE!'/'  KP=',F6.3,'  KZ=',&
+          !&  F6.4,'  X=',E12.2,E12.2/'  I=',I3,'  IRK=',I3/)
+          IF(cycleZFirst == 1) PLG = 1.D99 ! end cycling in P
+          IF(cycleZFirst == 2) ZLG = 1.D99 ! end cycling in Z
       end if
       if (solutionIsTooHeavilyDamped) then
           !if (printDebugInfo) PRINT*,' TOO HEAVILY DAMPED!'
@@ -141,6 +143,7 @@ SUBROUTINE WHAMP_ENGINE
           X=XO-ddDX
       end if
   end do z_p_loop
+  return
   contains
   subroutine plasma_setup
           DEN=0.d+0
@@ -191,6 +194,7 @@ SUBROUTINE WHAMP_ENGINE
       IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
       !                  ****  START OF ITERATION.  ****
       !if (printDebugInfo) write(*,*) 'START:','. X=',X,'D=',D,'DX=',DX ! DEBUG
+      rootFindingConverged = .false.  ! default assumption
       iteration_loop: DO I=1,maxIterations
           ADIR=ABS(D)
           IRK=1
@@ -233,12 +237,13 @@ SUBROUTINE WHAMP_ENGINE
                   CX=CX/2.
                   if (IRK > 3) then ! check for sitting at local minima
                       if ((ABS(D)-ADIR)/ADIR<1e-5) then
-                          rootFindingConverged = .false.
                           exit iteration_loop
                       end if
                   end if
                   IRK=IRK+1
-                  IF(IRK.GT.maxIterations) exit iteration_loop
+                  IF(IRK.GT.maxIterations) then 
+                      exit iteration_loop
+                  end if
               end if
           end do irk_loop
       end do iteration_loop
