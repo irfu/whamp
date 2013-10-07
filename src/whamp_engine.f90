@@ -312,6 +312,8 @@ SUBROUTINE WHAMP_ENGINE
           allocate (flagTooHeavilyDampedOUT(kperpSize,kparSize))
           allocate (flagNoConvergenceOUT(kperpSize,kparSize))
           flagSolutionFoundOUT = 0
+          flagTooHeavilyDampedOUT = 0
+          flagNoConvergenceOUT = 0
   end subroutine
   subroutine save_output
           integer :: indexKperp, indexKpar
