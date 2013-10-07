@@ -18,8 +18,12 @@ SUBROUTINE READ_INPUT_FILE(FILENAME)
         AA(:,2)=[0.1,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         ASS=[0.0,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         VD =[0.0,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        XC=3.00
+        XC=0.279928
         PZL=0.0
+        cycleZFirst=1
+        PM=[0.0, 0.0, 10.0]
+        ZM=[0.0, 0.0, 10.0]
+        XOI=.1
         return
     else
         write(*,*)'# read_input_file: file = ', filename

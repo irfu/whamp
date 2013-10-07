@@ -57,7 +57,6 @@ SUBROUTINE TYPIN(NPL,KFS)
            REWIND IFILE
         END IF
      end do
-
      NC=0
      input_line_loop: do
         flag_ambiguous_character=0 ! default assume non-alpha character

@@ -6,14 +6,15 @@ SUBROUTINE WHAMP_ENGINE
   !integer, parameter :: d2p=kind(1.0d0)
   integer, parameter :: d2p=8
 
-  integer :: I,IERR,IRK,J,KFS
+  integer :: I,IERR,IRK,J
   logical :: rootFindingConverged 
   logical :: solutionIsTooHeavilyDamped
-  real(kind=d2p) :: DEN        ! total electron density
+!  real(kind=d2p) :: DEN        ! total electron density
   real(kind=d2p) :: REN(10)    ! particle mass expressed in masses of first particles
   real(kind=d2p) :: RN         ! mass of first particle in electron masses
   real(kind=d2p) :: ADIR       ! abs(D)
-  real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
+  real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO
+  !real(kind=d2p) :: PX
   real(kind=d2p) :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
   DIMENSION T(10),ST(10)
@@ -21,140 +22,124 @@ SUBROUTINE WHAMP_ENGINE
   !CALL READ_INPUT_FILE(FILENAME)
   !
   IERR=0
-
   call allocate_output_matrices
   call plasma_setup
+  if ((PM(1)==0.0) .and. (ZM(1)==0.0)) return
   call input_setup
-     typin_loop: do 
-        KV=1
-        PLG=PM(1)
-        IF(PM(3).LT.0.) PLG=PM(2)
-        ZLG=ZM(1)
-        IF(ZM(3).LT.0.) ZLG=ZM(2)
-        IF(PZL==1.) then
-           P=10.**PLG
-           Z=10.**ZLG
-        else
-           P=PLG
-           Z=ZLG
-        end if
-        X=XOI
-        z_p_loop: do
-           OME=(X*XA)**2
-           FPX=PFQ/OME
-           DO  J=1,JMA
-              XX(J)=X*REN(J)
-              PP(J)=P*ST(J)
-              ZZ(J)=Z*ST(J)
-              XP(J)=DN(J)/DEK/REN(J)/OME
-           end do
-           !
-           solutionIsTooHeavilyDamped = .false. ! default not heaviily damped
-           rootFindingConverged       = .false. ! default no convergence       
-           call root_finding
-           !
-           if (.not. rootFindingConverged ) then
-              PRINT 125,P,Z,X,I,IRK
-125           FORMAT(2X,'NO CONVERGENCE!'/'  KP=',F6.3,'  KZ=',&
-                   &  F6.4,'  X=',E12.2,E12.2/'  I=',I3,'  IRK=',I3/)
-              IF(KFS .EQ. 1) PLG = 1.D99 ! end cycling in P
-              IF(KFS .EQ. 2) ZLG = 1.D99 ! end cycling in Z
-           end if
-           if ((rootFindingConverged) .AND. (.not.solutionIsTooHeavilyDamped)) then
-              !                  ****  CONVERGENCE!  ****
-              CALL DIFU(4,JMA,IERR)
-              !
-              XI=DIMAG(X)
-              VG(1)=-real(DP/DX)
-              VG(2)=-real(DZ/DX)
-              RI=SQRT(P**2+Z**2)*CV/real(X)  ! refractive index
-              IF(VG(1).NE.0.) SG(1)=XI/VG(1)
-              IF(VG(2).NE.0.) SG(2)=XI/VG(2)
-              !          ****  PRINT THE RESULTS.  ****
-              !              CALL OUTPT
-              call save_output
-              PO=P
-              ZO=Z
-              XO=X
-              IF(KV /= 0) then
-                 XVO=X
-                 ZVO=Z
-                 ZLO=ZLG
-                 PVO=P
-                 PLO=PLG
-                 DOX=DX
-                 DOZ=DZ
-                 DOP=DP
-                 KV=0
-              end if
-           end if
-           if (solutionIsTooHeavilyDamped) then
-              PRINT*,' TOO HEAVILY DAMPED!'
-              PRINT*,'   '
-              IERR=0
-              !CALL OUTPT
-              IF(KFS .EQ. 1) PLG = 1.D99
-              IF(KFS .EQ. 2) ZLG = 1.D99
-           end if
-           
-           if (KFS == 1) then        ! cycle first P
-              PLG=PLG+PM(3)
-              !                   **** UPDATE P AND Z.  ****
-              if(PLG.GE.PM(1).AND.PLG.LE.PM(2)) then
-                 P=PLG+PZL*(10.**PLG-PLG)
-              else 
-                 ZLG=ZLG+ZM(3)
-                 print*
-                 if(ZLG.LT.ZM(1).OR.ZLG.GT.ZM(2)) then 
-                    cycle typin_loop 
-                 end if
-                 KV=1
-                 PLG=PLO
-                 P=PVO
-                 Z=ZLG+PZL*(10.**ZLG-ZLG)
-              end if
-           else if (KFS == 2) then ! cycle first Z
+
+  KV=1
+  PLG=PM(1)
+  IF(PM(3).LT.0.) PLG=PM(2)
+  ZLG=ZM(1)
+  IF(ZM(3).LT.0.) ZLG=ZM(2)
+  IF(PZL==1.) then
+      P=10.**PLG
+      Z=10.**ZLG
+  else
+      P=PLG
+      Z=ZLG
+  end if
+  X=XOI
+  z_p_loop: do
+      OME=(X*XA)**2
+      FPX=PFQ/OME
+      DO  J=1,JMA
+          XX(J)=X*REN(J)
+          PP(J)=P*ST(J)
+          ZZ(J)=Z*ST(J)
+          XP(J)=DN(J)/DEK/REN(J)/OME
+      end do
+      !
+      solutionIsTooHeavilyDamped = .false. ! default not heaviily damped
+      rootFindingConverged       = .false. ! default no convergence       
+      call root_finding
+      !
+      if (.not. rootFindingConverged ) then
+          !if (printDebugInfo) PRINT 125,P,Z,X,I,IRK
+          !125           FORMAT(2X,'NO CONVERGENCE!'/'  KP=',F6.3,'  KZ=',&
+          !&  F6.4,'  X=',E12.2,E12.2/'  I=',I3,'  IRK=',I3/)
+          IF(cycleZFirst == 1) PLG = 1.D99 ! end cycling in P
+          IF(cycleZFirst == 2) ZLG = 1.D99 ! end cycling in Z
+      end if
+      if ((rootFindingConverged) .AND. (.not.solutionIsTooHeavilyDamped)) then
+          !                  ****  CONVERGENCE!  ****
+          CALL DIFU(4,JMA,IERR)
+          !
+          XI=DIMAG(X)
+          VG(1)=-real(DP/DX)
+          VG(2)=-real(DZ/DX)
+          RI=SQRT(P**2+Z**2)*CV/real(X)  ! refractive index
+          IF(VG(1).NE.0.) SG(1)=XI/VG(1)
+          IF(VG(2).NE.0.) SG(2)=XI/VG(2)
+          !          ****  PRINT THE RESULTS.  ****
+          !if (printDebugInfo)              CALL OUTPT
+          call save_output
+          PO=P
+          ZO=Z
+          XO=X
+          IF(KV /= 0) then
+              XVO=X
+              ZVO=Z
+              ZLO=ZLG
+              PVO=P
+              PLO=PLG
+              DOX=DX
+              DOZ=DZ
+              DOP=DP
+              KV=0
+          end if
+      end if
+      if (solutionIsTooHeavilyDamped) then
+          !if (printDebugInfo) PRINT*,' TOO HEAVILY DAMPED!'
+          IERR=0
+          !if (printDebugInfo) CALL OUTPT
+          IF(cycleZFirst .EQ. 1) PLG = 1.D99
+          IF(cycleZFirst .EQ. 2) ZLG = 1.D99
+      end if
+      if (cycleZFirst == 0) then        ! cycle first P
+          PLG=PLG+PM(3)
+          !                   **** UPDATE P AND Z.  ****
+          if(PLG.GE.PM(1).AND.PLG.LE.PM(2)) then
+              P=PLG+PZL*(10.**PLG-PLG)
+          else 
               ZLG=ZLG+ZM(3)
-              IF(ZLG.GE.ZM(1).AND.ZLG.LE.ZM(2)) then
-                 Z=ZLG+PZL*(10.**ZLG-ZLG)
-              else 
-                 PLG=PLG+PM(3)
-                 print*
-                 IF(PLG.LT.PM(1).OR.PLG.GT.PM(2)) cycle typin_loop
-                 KV=1
-                 ZLG=ZLO
-                 Z=ZVO
-                 P=PLG+PZL*(10.**PLG-PLG)
+              !print*
+              if(ZLG.LT.ZM(1).OR.ZLG.GT.ZM(2)) then 
+                  exit z_p_loop 
               end if
-           end if
-           !                    ****  NEW START FREQUENCY.  ****
-           IF(KV /= 0) then 
-              DKP=P-PVO
-              DKZ=Z-ZVO
-              ddDX=(DKP*DOP+DKZ*DOZ)/DOX
-              X=XVO-ddDX
-           else
-              DKP=P-PO
-              DKZ=Z-ZO
-              ddDX=(DKP*DP+DKZ*DZ)/DX
-              X=XO-ddDX
-           end if
-        end do z_p_loop
-     end do typin_loop
+              KV=1
+              PLG=PLO
+              P=PVO
+              Z=ZLG+PZL*(10.**ZLG-ZLG)
+          end if
+      else if (cycleZFirst == 1) then ! cycle first Z
+          ZLG=ZLG+ZM(3)
+          IF(ZLG.GE.ZM(1).AND.ZLG.LE.ZM(2)) then
+              Z=ZLG+PZL*(10.**ZLG-ZLG)
+          else 
+              PLG=PLG+PM(3)
+              !print*
+              IF(PLG.LT.PM(1).OR.PLG.GT.PM(2)) exit z_p_loop
+              KV=1
+              ZLG=ZLO
+              Z=ZVO
+              P=PLG+PZL*(10.**PLG-PLG)
+          end if
+      end if
+      !                    ****  NEW START FREQUENCY.  ****
+      IF(KV /= 0) then 
+          DKP=P-PVO
+          DKZ=Z-ZVO
+          ddDX=(DKP*DOP+DKZ*DOZ)/DOX
+          X=XVO-ddDX
+      else
+          DKP=P-PO
+          DKZ=Z-ZO
+          ddDX=(DKP*DP+DKZ*DZ)/DX
+          X=XO-ddDX
+      end if
+  end do z_p_loop
   contains
-  subroutine print_plasma_parameters
- !                  ****  PRINT PLASMA PARAMETERS.  ****
-     PRINT 101,PX,XC,DEN
-101  FORMAT('# PLASMA FREQ.:',  F11.4,&
-          &       'KHZ GYRO FREQ.:',  F10.4,  'KHZ   ',&
-          &       'ELECTRON DENSITY:',1PE11.5,  'M-3'   )
-     DO  J=1,JMA
-102     FORMAT('# ',  A3,  '  DN=',1PE12.5,  '  T=',0PF9.5,  '  D=',  F4.2,&
-             &'  A=',  F4.2,  '  B=',  F4.2,  ' VD=',  F5.2)
-        PRINT 102,species_symbol(ASS(J)),DN(J),TA(J),DD(J),AA(J,1),AA(J,2),VD(J)
-     end do
-     !
-  end subroutine
   subroutine plasma_setup
           DEN=0.d+0
           RED=0.d+0
@@ -185,11 +170,8 @@ SUBROUTINE WHAMP_ENGINE
           CV=1./SQRT(CV)
           DEK=DEK*RN
           !
-          call print_plasma_parameters()
-          !
   end subroutine
   subroutine input_setup
-          KFS = zfirst
 
   end subroutine
   subroutine root_finding
@@ -236,7 +218,7 @@ SUBROUTINE WHAMP_ENGINE
                   if( (ABS(CX).LE.1.E-6*ABS(X)) &    ! relative frequency precision
                       & .or. (ABS(CX) < 1e-6) ) then ! absolute precision
                       rootFindingConverged = .true.
-                      if (I >= 2) then ! at least 2 steps have been made
+                      if (I >= 2) then ! at least 2 iteration steps have been made
                           exit iteration_loop
                       else
                           cycle iteration_loop
@@ -262,27 +244,52 @@ SUBROUTINE WHAMP_ENGINE
   subroutine allocate_output_matrices
           ! estimate the size of matrices
           integer :: i
-          if (size(PM) == 1) then ! scalar
+          if (allocated(kperpOUT)) deallocate(kperpOUT)
+          if (allocated(kparOUT)) deallocate(kparOUT)
+          if (allocated(fOUT)) deallocate(fOUT)
+          if (allocated(ExOUT)) deallocate(ExOUT)
+          if (allocated(EyOUT)) deallocate(EyOUT)
+          if (allocated(EzOUT)) deallocate(EzOUT)
+          if (allocated(BxOUT)) deallocate(BxOUT)
+          if (allocated(ByOUT)) deallocate(ByOUT)
+          if (allocated(BzOUT)) deallocate(BzOUT)
+          if (allocated(SxOUT)) deallocate(SxOUT)
+          if (allocated(SyOUT)) deallocate(SyOUT)
+          if (allocated(SzOUT)) deallocate(SzOUT)
+          if (allocated(EBOUT)) deallocate(EBOUT)
+          if (allocated(VGPOUT)) deallocate(VGPOUT)
+          if (allocated(VGZOUT)) deallocate(VGZOUT)
+          if (allocated(SGPOUT)) deallocate(SGPOUT)
+          if (allocated(SGZOUT)) deallocate(SGZOUT)
+          if (allocated(uOUT)) deallocate(uOUT)
+          if (allocated(flagSolutionFoundOUT)) deallocate(flagSolutionFoundOUT)
+          if (allocated(flagTooHeavilyDampedOUT)) deallocate(flagTooHeavilyDampedOUT)
+          if (allocated(flagNoConvergenceOUT)) deallocate(flagNoConvergenceOUT)
+
+          if (PM(1) == PM(2)) then ! kperp is one value
               kperpSize = 1
               allocate (kperpOUT(1))
-              kperpOUT = PM
-          elseif (size(PM) == 3) then ! vector
-              kperpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(PM(3),1.0d0)/PM(3))
+              kperpOUT = PM(1)
+          else                     ! kperp is vector
+              kperpSize = 1 + floor((max(PM(1),PM(2))-min(PM(1),PM(2)))*sign(1.0d0,PM(3))/PM(3))
               allocate (kperpOUT(kperpSize))
               do i=1,kperpSize
                   kperpOUT(i) = PM(1)+(i-1.0)*PM(3)
               end do
           end if
-          if (size(ZM) == 1) then ! scalar
+
+          if (ZM(1) == ZM(2)) then ! scalar
               kparSize = 1
-              kparOUT = ZM
-          elseif (size(ZM) == 3) then ! vector
-              kparSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(ZM(3),1.0d0)/ZM(3))
+              allocate (kparOUT(1))
+              kparOUT = ZM(1)
+          else ! vector
+              kparSize = 1 + floor((max(ZM(1),ZM(2))-min(ZM(1),ZM(2)))*sign(1.0d0,ZM(3))/ZM(3))
               allocate (kparOUT(kparSize))
               do i=1,kparSize
                   kparOUT(i) = ZM(1)+(i-1.0)*ZM(3)
               end do
           end if
+
           allocate (fOUT(kperpSize,kparSize))
           allocate (ExOUT(kperpSize,kparSize))
           allocate (EyOUT(kperpSize,kparSize))
@@ -337,21 +344,4 @@ SUBROUTINE WHAMP_ENGINE
               flagNoConvergenceOUT(indexKperp,indexKpar) = 1
           endif
   end subroutine
-  pure function species_symbol(mass) result(symbol)
-          real(kind=d2p),intent(in) :: mass
-          character(5)   :: symbol
-          if (mass==0) then
-              symbol = 'e-'
-          else if (mass==1) then
-              symbol = 'H+'
-          else if (mass==2) then
-              symbol = 'He++'
-          else if (mass==4) then
-              symbol = 'He+'
-          else if (mass==16) then
-              symbol = 'O+'
-          else
-             !write(symbol,'(a,I3)') 'm=',mass 
-          endif
-  end function
 end subroutine WHAMP_ENGINE

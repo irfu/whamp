@@ -13,11 +13,12 @@ PROGRAM WHAMP
   logical :: rootFindingConverged 
   logical :: solutionIsTooHeavilyDamped
   logical :: isChangedPlasmaModel
-  real(kind=d2p) :: DEN        ! total electron density
+!  real(kind=d2p) :: DEN        ! total electron density
   real(kind=d2p) :: REN(10)    ! particle mass expressed in masses of first particles
   real(kind=d2p) :: RN         ! mass of first particle in electron masses
   real(kind=d2p) :: ADIR       ! abs(D)
-  real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO,PX
+  real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO
+!  real(kind=d2p) :: PX         ! plasma frequency
   real(kind=d2p) :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   CHARACTER FILENAME*(80)
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP

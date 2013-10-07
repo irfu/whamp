@@ -18,17 +18,20 @@ C     Declarations
 C     mexFunction arguments:
       mwPointer plhs(*), prhs(*)
       integer nlhs, nrhs
+      integer,external ::  mxClassIDFromClassName
  
 C     Function declarations:
-      mwPointer mxCreateDoubleMatrix, mxGetPr
+      mwPointer mxCreateNumericMatrix
+      mwPointer mxCreateDoubleMatrix, mxGetPr, mxGetPi
       mwPointer, external :: mxIsComplex, mxIsNumeric
       mwPointer, external :: mxGetM, mxGetN
  
 C     Pointers to input/output mxArrays:
-      mwPointer x_pr, y_pr
+      mwPointer x_pr, y_pr, y_pi
  
 C     Array information:
-      mwPointer m, n
+      !mwPointer m, n
+      mwSize m, n
       mwSize size
  
 C     Arguments for computational routine:
@@ -39,10 +42,10 @@ C     Maximum size = numel
  
 C-----------------------------------------------------------------------
 C     Check for proper number of arguments. 
-      if(nrhs .ne. 11) then
+      if(nrhs .ne. 12) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nInput',
      +                           'One input required.')
-      elseif(nlhs .ne. 1) then
+      elseif(nlhs .ne. 21) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nOutput',
      +                           'One output required.')
       endif
@@ -56,7 +59,7 @@ C      x_pr = mxGetPr(prhs(1))
       call mxCopyPtrToReal8(mxGetPr(prhs(ind)), PZL ,size)
       ind = 3
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), zfirst ,size)
+      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), cycleZFirst ,size)
       ind = 4
       call input_size(ind)
       call mxCopyPtrToReal8(mxGetPr(prhs(ind)), DN ,size)
@@ -81,25 +84,116 @@ C      x_pr = mxGetPr(prhs(1))
       ind = 11
       call input_size(ind)
       call mxCopyPtrToReal8(mxGetPr(prhs(ind)), ZM ,size)
-
+      ind = 12
+      call input_size(ind)
+      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), XOI ,size)
 
 C     Call the computational subroutine.
       call whamp_engine
 
 C     Set output using comoutput
 
-
 C     Create matrix for the return argument.
-C      plhs(1) = mxCreateDoubleMatrix(m,n,0)
+C     plhs(1) = mxCreateDoubleMatrix(m,n,0)
+      size = kperpSize * kparSize
       ind = 1
-      plhs(1) = mxCreateDoubleMatrix(1,kperpSize,0)
+      plhs(ind) = mxCreateDoubleMatrix(1,kperpSize,0)
       y_pr = mxGetPr(plhs(ind))
-      call mxCopyReal8ToPtr(kperpOUT,y_pr,kperpSize)     
-      plhs(1) = mxCreateDoubleMatrix(1,10,1)
+      call mxCopyReal8ToPtr(kperpOut,y_pr,kperpSize)
+      ind = 2
+      plhs(ind) = mxCreateDoubleMatrix(1,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(kparOut,y_pr,kparSize)
+      ind = 3
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(fOUT,y_pr,y_pi,size)
+      ind = 4
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(ExOUT,y_pr,y_pi,size)
+      ind = 5
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(EyOUT,y_pr,y_pi,size)
+      ind = 6
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(EzOUT,y_pr,y_pi,size)
+      ind = 7
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(BxOUT,y_pr,y_pi,size)
+      ind = 8
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(ByOUT,y_pr,y_pi,size)
+      ind = 9
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(BzOUT,y_pr,y_pi,size)
+      ind = 10
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(SxOUT,y_pr,y_pi,size)
+      ind = 11
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(SyOUT,y_pr,y_pi,size)
+      ind = 12
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,1)
+      y_pr = mxGetPr(plhs(ind))
+      y_pi = mxGetPi(plhs(ind))
+      call mxCopyComplex16ToPtr(SzOUT,y_pr,y_pi,size)
+      ind = 13
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(EBOUT,y_pr,size)
+      ind = 14
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(VGPOUT,y_pr,size)
+      ind = 15
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(VGZOUT,y_pr,size)
+      ind = 16
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(SGPOUT,y_pr,size)
+      ind = 17
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(SGZOUT,y_pr,size)
+      ind = 18
+      plhs(ind) = mxCreateDoubleMatrix(kperpSize,kparSize,0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyReal8ToPtr(uOUT,y_pr,size)
 
-
-C     Load the data into y_pr, which is the output to MATLAB.
-      call mxCopyReal8ToPtr(DN,y_pr,10)     
+      ind = 19
+      plhs(ind) = mxCreateNumericMatrix(kperpSize,kparSize,
+     +      mxClassIDFromClassName('int32'),0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyInteger4ToPtr(flagSolutionFoundOUT,y_pr,size)
+      ind = 20
+      plhs(ind) = mxCreateNumericMatrix(kperpSize,kparSize,
+     +      mxClassIDFromClassName('int32'),0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyInteger4ToPtr(flagTooHeavilyDampedOUT,y_pr,size)
+      ind = 21
+      plhs(ind) = mxCreateNumericMatrix(kperpSize,kparSize,
+     +      mxClassIDFromClassName('int32'),0)
+      y_pr = mxGetPr(plhs(ind))
+      call mxCopyInteger4ToPtr(flagNoConvergenceOUT,y_pr,size)
 
       return
 

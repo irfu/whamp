@@ -15,7 +15,7 @@ BINDIR = .
 
 FFLAGS = -c -Wall
 
-all: whamp whampengine
+all: whamp whampengine whamptest
 
 %.o: %.f90
 	$(FTN) $(FFLAGS) $<
@@ -29,6 +29,11 @@ ALLSRC =energy.f90 rint.f90\
 OBJS =  energy.o  rint.o\
 	rtay.o  xsi.o  output.o  ryla.o\
 	rasy.o  typin.o difu.o   whamp.o\
+	 input.o  ctof.o av.o comin.o comcout.o
+
+OBJSTEST =  energy.o  rint.o\
+	rtay.o  xsi.o  output.o  ryla.o\
+	rasy.o  typin.o difu.o   whamptest.o\
 	whamp_engine.o comoutput.o\
 	 input.o  ctof.o av.o comin.o comcout.o
 
@@ -44,8 +49,11 @@ comoutput.o: comoutput.f90
 whamp:  ${OBJS} 
 	${LD}  ${OBJS} -o ${BINDIR}/whamp
 
-whampengine: ${OBJS}
-	${AR} libwhamp.a whamp_engine.o comin.o comoutput.o comcout.o difu.o xsi.o energy.o ryla.o rtay.o rasy.o rint.o
+whamptest:  ${OBJSTEST} 
+	${LD}  ${OBJSTEST} -o ${BINDIR}/whamptest
+
+whampengine: ${OBJSTEST}
+	${AR} libwhamp.a whamp_engine.o comin.o comoutput.o comcout.o difu.o xsi.o energy.o ryla.o rtay.o rasy.o rint.o 
 
 energy.o  output.o  difu.o: comcout.o
 xsi.o   output.o  difu.o: comin.o
