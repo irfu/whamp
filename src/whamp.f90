@@ -213,11 +213,11 @@ PROGRAM WHAMP
       iteration_loop: DO I=1,maxIterations
           ADIR=ABS(D)
           IRK=1
-          if (I < 2) then ! first step make only in real direction
-              CX=REALPART(D)/REALPART(DX)
-          else
+!          if (I < 2) then ! first step make only in real direction
+!              CX=REALPART(D)/REALPART(DX)
+!          else
               CX=D/DX
-          end if
+!          end if
           CX=CX*X/(2*CX+X) ! finding zero of (w^2 D), faster convergence
           irk_loop: do
               X=X-CX
@@ -252,6 +252,7 @@ PROGRAM WHAMP
                   CX=CX/2.
                   if (IRK > 3) then ! check for sitting at local minima
                       if ((ABS(D)-ADIR)/ADIR<1e-5) then
+                          PRINT*,' Local minima!'
                           rootFindingConverged = .false.
                           exit iteration_loop
                       end if
