@@ -23,8 +23,36 @@ PROGRAM WHAMP
   CHARACTER FILENAME*(80)
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
   DIMENSION T(10),ST(10)
+  integer :: narg,iarg
+  character(len=20) :: inputParameter,modelFilename
 
-  CALL READ_INPUT_FILE(FILENAME)
+  !CALL READ_INPUT_FILE(FILENAME)
+  !Check if arguments are found
+  narg=command_argument_count()
+ 
+  iArg = 1
+  do 
+    if (iArg > narg) exit
+    call get_command_argument(iArg,inputParameter)
+    if (printDebugInfo) write(*,*) "Input parameter:",inputParameter
+    select case(adjustl(inputParameter))
+      case("-debug")
+        printDebugInfo = .true.
+        if (printDebugInfo) write(*,*)"Enable debugging"
+      case("-file")
+        if (iArg == narg) then 
+          write(*,*) "ERROR: File name not given"
+          stop
+        endif
+        call get_command_argument(iArg,inputParameter)
+        if (printDebugInfo) write(*,*)"Reading file"
+      case default
+        if (printDebugInfo) write(*,*)"Option '",trim(inputParameter),"' is unknown"
+    end select
+    iArg = iArg + 1
+  end do
+
+
   !
   IERR=0
 
