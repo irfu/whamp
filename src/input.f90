@@ -1,32 +1,15 @@
-SUBROUTINE READ_INPUT_FILE(FILENAME)
+SUBROUTINE read_input_file(FILENAME)
     use comin
     use comcout
     implicit none
     integer :: I,ioerr,LU=16
     CHARACTER*(*) FILENAME
-    CHARACTER FFILENAME*80
 
-    write(*,*) '# input file name: '
-    read(*,101)FILENAME
-    101 format(A)
     if (FILENAME .EQ.'') then
-        write(*,*) 'Using default plasma model'
-        DN=[1.0e6, 1.0e6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        TA=[0.01, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        DD=[1.0,   1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        AA(:,1)=[5.0,   1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        AA(:,2)=[0.1,   0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        ASS=[16.0,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        VD =[1.0,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        XC=2.79928
-        PZL=0.0
-        cycleZFirst=1
-        PM=[0.0, 0.0, 10.0]
-        ZM=[0.0, 0.0, 10.0]
-        XOI=.1
-        return
+        write(*,*) 'ERROR model filename not given!'
+        stop
     else
-        write(*,*)'# read_input_file: file = ', filename
+        if (printDebugInfo) write(*,*)'# read_input_file: file = ', filename
         OPEN(UNIT=LU,FILE=FILENAME,iostat=ioerr)
         if (ioerr /= 0) then ! error opening file
             WRITE(*,*)'READ_INPUT_FILE: ERROR IN OPEN, FILE = ', FILENAME
@@ -46,7 +29,7 @@ SUBROUTINE READ_INPUT_FILE(FILENAME)
         CLOSE(LU)
         RETURN
     end if
-    999 WRITE(*,*)'READ_INPUT_FILE: ERROR IN READ, FILE = ',FFILENAME
+    999 WRITE(*,*)'READ_INPUT_FILE: ERROR IN READ, FILE = ',FILENAME
     CLOSE(LU)
     RETURN
     END

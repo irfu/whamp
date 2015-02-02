@@ -1,7 +1,6 @@
 module comin
 implicit none
-!integer, parameter,private :: d2p=kind(1.0d0)
-integer, parameter,private :: d2p=8
+integer, parameter,private :: d2p=8  !d2p=kind(1.0d0)
 
 real(kind=d2p) :: ASS(10)  ! particle mass in unit of mp, if 0 then use e- mass
 real(kind=d2p) :: AA(10,2) ! alpha parameters in distribution function
@@ -19,16 +18,16 @@ logical        :: printDebugInfo=.false.
 
 integer        :: cycleZFirst   ! which direction vary first (KFS in WHAMP) ?? how to handle
 
-!  ------     below are variables calculated by WHAMP_ENGINE -----------
+!  ------     below are variables calculated by WHAMP or WHAMP_ENGINE -----------
 !
-integer :: JMA             ! the number of last plasma species with non-zero density
-real(kind=d2p) :: PP(10)   ! ??
-real(kind=d2p) :: ZZ(10)   ! ??
-real(kind=d2p) :: CV       ! speed of light / thermal velocity of 1st species
+integer           :: JMA    ! the number of last plasma species with non-zero density
+real(kind=d2p)    :: PP(10) ! ??
+real(kind=d2p)    :: ZZ(10) ! ??
+real(kind=d2p)    :: CV     ! speed of light / thermal velocity of 1st species
 complex(kind=d2p) :: XX(10)
 complex(kind=d2p) :: XP(10) ! wpj^2/w^2
-real(kind=d2p) :: PX        ! plasma frequency
-real(kind=d2p) :: DEN       ! total electron density
+real(kind=d2p)    :: PX     ! plasma frequency
+real(kind=d2p)    :: DEN    ! total electron density
 
 end module comin
 

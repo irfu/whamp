@@ -1,41 +1,49 @@
-!**************************************************************
-!
-! File whamp.f 
-!       SUBROUTINE WHAMP(IREAD_FILE, FILENAME)
 PROGRAM WHAMP 
   use comin
   use comcout
   implicit none
-  !integer, parameter :: d2p=kind(1.0d0)
-  integer, parameter :: d2p=8
+  integer, parameter :: d2p=8   !d2p=kind(1.0d0)
 
-  integer :: I,IERR,IRK,J,KFS
-  logical :: rootFindingConverged 
-  logical :: solutionIsTooHeavilyDamped
-  logical :: isChangedPlasmaModel
-!  real(kind=d2p) :: DEN        ! total electron density
-  real(kind=d2p) :: REN(10)    ! particle mass expressed in masses of first particles
-  real(kind=d2p) :: RN         ! mass of first particle in electron masses
-  real(kind=d2p) :: ADIR       ! abs(D)
-  real(kind=d2p) :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO
-!  real(kind=d2p) :: PX         ! plasma frequency
-  real(kind=d2p) :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
-  CHARACTER FILENAME*(80)
+  integer           :: I,IERR,IRK,J,KFS
+  logical           :: rootFindingConverged 
+  logical           :: solutionIsTooHeavilyDamped
+  logical           :: isChangedPlasmaModel
+  real(kind=d2p)    :: REN(10)    ! particle mass expressed in masses of first particles
+  real(kind=d2p)    :: RN         ! mass of first particle in electron masses
+  real(kind=d2p)    :: ADIR       ! abs(D)
+  real(kind=d2p)    :: DEK,DKP,DKZ,KV,PFQ,PLG,PLO,PO,PVO
+  real(kind=d2p)    :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO,ZVO
   COMPLEX(kind=d2p) :: XO,XVO,ddDX,OME,FPX, DOX,DOZ,DOP
   DIMENSION T(10),ST(10)
-  integer :: narg,iarg
+  integer           :: narg,iarg
   character(len=20) :: inputParameter,modelFilename
 
-  !CALL READ_INPUT_FILE(FILENAME)
-  !Check if arguments are found
+! Default plasma model
+  DN=     [1.0e6, 1.0e6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  TA=     [0.01,  0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  DD=     [1.0,   1.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  AA(:,1)=[5.0,   1.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  AA(:,2)=[0.1,   0.1,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ASS=    [16.0,  0.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  VD=     [1.0,   0.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  XC=     2.79928
+  PZL=    0.0
+  cycleZFirst=1
+  PM=     [0.0, 0.0, 10.0]
+  ZM=     [0.0, 0.0, 10.0]
+  XOI=    .1
+
+! Check command line input parameters
   narg=command_argument_count()
- 
   iArg = 1
   do 
     if (iArg > narg) exit
     call get_command_argument(iArg,inputParameter)
     if (printDebugInfo) write(*,*) "Input parameter:",inputParameter
     select case(adjustl(inputParameter))
+      case("-help")
+        write(*,*) "usage: whamp [-help] [-debug] [-file <modelFilename>]"
+        stop
       case("-debug")
         printDebugInfo = .true.
         if (printDebugInfo) write(*,*)"Enable debugging"
@@ -44,8 +52,10 @@ PROGRAM WHAMP
           write(*,*) "ERROR: File name not given"
           stop
         endif
-        call get_command_argument(iArg,inputParameter)
-        if (printDebugInfo) write(*,*)"Reading file"
+        iArg = iArg + 1
+        call get_command_argument(iArg,modelFilename)
+        if (printDebugInfo) write(*,*) "Reading file: ",modelFilename 
+        call read_input_file(modelFilename)
       case default
         if (printDebugInfo) write(*,*)"Option '",trim(inputParameter),"' is unknown"
     end select
@@ -232,7 +242,7 @@ PROGRAM WHAMP
       ! 3) convergence criteria both on relative and absolute size of CX and on
       ! relative change in D
       integer(kind=4),parameter :: maxIterations=50
-      complex(kind=d2p) :: CX ! correction in Newton's iteration method
+      complex(kind=d2p)         :: CX                ! correction in Newton's iteration method
       
       CALL DIFU(2,JMA,IERR)
       IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
