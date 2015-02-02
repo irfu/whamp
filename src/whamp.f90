@@ -42,7 +42,7 @@ PROGRAM WHAMP
     if (printDebugInfo) write(*,*) "Input parameter:",inputParameter
     select case(adjustl(inputParameter))
       case("-help","-h","--help")
-        write(*,*) "usage: whamp [-help] [-debug] [-file <modelFilename>]"
+        write(*,*) "usage: whamp [-help] [-debug] [-maxiterations <number>] [-file <modelFilename>] "
         stop
       case("-debug")
         printDebugInfo = .true.
@@ -79,15 +79,15 @@ PROGRAM WHAMP
      isChangedPlasmaModel = .false. ! changed to .true. in code when new plasma parameters are entered
      DEN=0.d+0
      RED=0.d+0
-     species_loop: DO J=1,10
+     loop_species: DO J=1,10
         REN(J)=1836.1*ASS(J)
         IF(REN(J).EQ.0.) REN(J)=1.
         T(J)=TA(J)/TA(1)
-        IF(DN(J).EQ.0.) cycle species_loop
+        IF(DN(J).EQ.0.) cycle loop_species
         JMA=J
         RED=RED+DN(J)/REN(J)
         IF( ASS(J).EQ.0.) DEN=DEN+DN(J) 
-     end do species_loop
+     end do loop_species
      !
      RN=REN(1)
      !                  ****  NORMALIZED TEMPERATURES AND VELOCITIES.  ****
