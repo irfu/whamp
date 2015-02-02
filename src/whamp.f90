@@ -41,14 +41,14 @@ PROGRAM WHAMP
     call get_command_argument(iArg,inputParameter)
     if (printDebugInfo) write(*,*) "Input parameter:",inputParameter
     select case(adjustl(inputParameter))
-      case("-help")
+      case("-help","-h","--help")
         write(*,*) "usage: whamp [-help] [-debug] [-file <modelFilename>]"
         stop
       case("-debug")
         printDebugInfo = .true.
         if (printDebugInfo) write(*,*)"Enable debugging"
       case("-file")
-        if (iArg == narg) then 
+        if (iArg == narg) then
           write(*,*) "ERROR: File name not given"
           stop
         endif
@@ -56,6 +56,15 @@ PROGRAM WHAMP
         call get_command_argument(iArg,modelFilename)
         if (printDebugInfo) write(*,*) "Reading file: ",modelFilename 
         call read_input_file(modelFilename)
+      case("-maxiterations")
+        if (iArg == narg) then
+          write(*,*) "ERROR: maxiterations is not specified"
+          stop
+        endif
+        iArg = iArg + 1
+        call get_command_argument(iArg,inputParameter)
+        read(inputParameter,*) maxIterations
+        if (printDebugInfo) write(*,*) "Max iterations: ",maxIterations
       case default
         if (printDebugInfo) write(*,*)"Option '",trim(inputParameter),"' is unknown"
     end select
@@ -66,7 +75,7 @@ PROGRAM WHAMP
   !
   IERR=0
 
-  plasma_update_loop: do
+  loop_plasma_update: do
      isChangedPlasmaModel = .false. ! changed to .true. in code when new plasma parameters are entered
      DEN=0.d+0
      RED=0.d+0
@@ -99,10 +108,10 @@ PROGRAM WHAMP
      !
      call print_plasma_parameters()
      !                  ****  ASK FOR INPUT!  **** 
-     typin_loop: do 
+     loop_typin: do
         !for new plasma skip calling typin until convergence checked
         if(.not.isChangedPlasmaModel) call  TYPIN(isChangedPlasmaModel,KFS) 
-        if(isChangedPlasmaModel)      cycle plasma_update_loop
+        if(isChangedPlasmaModel)      cycle loop_plasma_update
         isChangedPlasmaModel = .false.
         KV=1
         PLG=PM(1)
@@ -117,7 +126,7 @@ PROGRAM WHAMP
            Z=ZLG
         end if
         X=XOI
-        z_p_loop: do
+        loop_z_p: do
            OME=(X*XA)**2
            FPX=PFQ/OME
            DO  J=1,JMA
@@ -183,7 +192,7 @@ PROGRAM WHAMP
                  ZLG=ZLG+ZM(3)
                  print*
                  if(ZLG.LT.ZM(1).OR.ZLG.GT.ZM(2)) then 
-                    cycle typin_loop 
+                    cycle loop_typin
                  end if
                  KV=1
                  PLG=PLO
@@ -197,7 +206,7 @@ PROGRAM WHAMP
               else 
                  PLG=PLG+PM(3)
                  print*
-                 IF(PLG.LT.PM(1).OR.PLG.GT.PM(2)) cycle typin_loop
+                 IF(PLG.LT.PM(1).OR.PLG.GT.PM(2)) cycle loop_typin
                  KV=1
                  ZLG=ZLO
                  Z=ZVO
@@ -216,9 +225,9 @@ PROGRAM WHAMP
               ddDX=(DKP*DP+DKZ*DZ)/DX
               X=XO-ddDX
            end if
-        end do z_p_loop
-     end do typin_loop
-  end do plasma_update_loop
+        end do loop_z_p
+     end do loop_typin
+  end do loop_plasma_update
   contains
   subroutine print_plasma_parameters
  !                  ****  PRINT PLASMA PARAMETERS.  ****
@@ -241,14 +250,14 @@ PROGRAM WHAMP
       ! convergence
       ! 3) convergence criteria both on relative and absolute size of CX and on
       ! relative change in D
-      integer(kind=4),parameter :: maxIterations=50
+
       complex(kind=d2p)         :: CX                ! correction in Newton's iteration method
       
       CALL DIFU(2,JMA,IERR)
       IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
       !                  ****  START OF ITERATION.  ****
       if (printDebugInfo) write(*,*) 'START:','. X=',X,'D=',D,'DX=',DX ! DEBUG
-      iteration_loop: DO I=1,maxIterations
+      loop_iteration: DO I=1,maxIterations
           ADIR=ABS(D)
           IRK=1
           if (I < 2) then ! first step make only in real direction
@@ -271,19 +280,19 @@ PROGRAM WHAMP
                             & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX ! DEBUG
               IF(IERR.NE.0) then
                   solutionIsTooHeavilyDamped = .true.
-                  exit iteration_loop
+                  exit loop_iteration
               end if
               IF(ABS(D).LT.ADIR) then
                   if( (ABS(CX).LE.1.E-6*ABS(X)) &    ! relative frequency precision
                       & .or. (ABS(CX) < 1e-6) ) then ! absolute precision
                       rootFindingConverged = .true.
                       if (I >= 2) then ! at least 2 steps have been made
-                          exit iteration_loop
+                          exit loop_iteration
                       else
-                          cycle iteration_loop
+                          cycle loop_iteration
                       end if
                   else
-                      cycle iteration_loop
+                      cycle loop_iteration
                   end if 
               else
                   X=X+CX
@@ -291,14 +300,14 @@ PROGRAM WHAMP
                   if (IRK > 3) then ! check for sitting at local minima
                       if ((ABS(D)-ADIR)/ADIR<1e-5) then
                           rootFindingConverged = .false.
-                          exit iteration_loop
+                          exit loop_iteration
                       end if
                   end if
                   IRK=IRK+1
-                  IF(IRK.GT.maxIterations) exit iteration_loop
+                  IF(IRK.GT.maxIterations) exit loop_iteration
               end if
           end do irk_loop
-      end do iteration_loop
+      end do loop_iteration
   end subroutine
   pure function species_symbol(mass) result(symbol)
           real(kind=d2p),intent(in) :: mass

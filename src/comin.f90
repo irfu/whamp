@@ -29,5 +29,9 @@ complex(kind=d2p) :: XP(10) ! wpj^2/w^2
 real(kind=d2p)    :: PX     ! plasma frequency
 real(kind=d2p)    :: DEN    ! total electron density
 
+!  ------     root finding parameters
+!
+integer(kind=4)   :: maxIterations=50
+
 end module comin
 
