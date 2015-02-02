@@ -42,7 +42,7 @@ SUBROUTINE WHAMP_ENGINE
       Z=ZLG
   end if
   X=XOI
-  z_p_loop: do
+  loop_z_p: do
       OME=(X*XA)**2
       FPX=PFQ/OME
       DO  J=1,JMA
@@ -109,7 +109,7 @@ SUBROUTINE WHAMP_ENGINE
               ZLG=ZLG+ZM(3)
               !print*
               if(ZLG.LT.ZM(1).OR.ZLG.GT.ZM(2)) then 
-                  exit z_p_loop 
+                  exit loop_z_p 
               end if
               KV=1
               PLG=PLO
@@ -123,7 +123,7 @@ SUBROUTINE WHAMP_ENGINE
           else 
               PLG=PLG+PM(3)
               !print*
-              IF(PLG.LT.PM(1).OR.PLG.GT.PM(2)) exit z_p_loop
+              IF(PLG.LT.PM(1).OR.PLG.GT.PM(2)) exit loop_z_p
               KV=1
               ZLG=ZLO
               Z=ZVO
@@ -142,21 +142,21 @@ SUBROUTINE WHAMP_ENGINE
           ddDX=(DKP*DP+DKZ*DZ)/DX
           X=XO-ddDX
       end if
-  end do z_p_loop
+  end do loop_z_p
   return
   contains
   subroutine plasma_setup
           DEN=0.d+0
           RED=0.d+0
-          species_loop: DO J=1,10
+          loop_species: DO J=1,10
               REN(J)=1836.1*ASS(J)
               IF(REN(J).EQ.0.) REN(J)=1.
               T(J)=TA(J)/TA(1)
-              IF(DN(J).EQ.0.) cycle species_loop
+              IF(DN(J).EQ.0.) cycle loop_species
               JMA=J
               RED=RED+DN(J)/REN(J)
               IF( ASS(J).EQ.0.) DEN=DEN+DN(J) 
-          end do species_loop
+          end do loop_species
           !
           RN=REN(1)
           !                  ****  NORMALIZED TEMPERATURES AND VELOCITIES.  ****
@@ -181,29 +181,20 @@ SUBROUTINE WHAMP_ENGINE
   end subroutine
   subroutine root_finding
       ! Newton's iteration method with small adjustments:
-      ! 1) First 2 steps are taken only along real direction to avoid
-      ! convergence to some large imaginary frequency solutions
-      ! 2) find roots of (w^2 D) instead of D, thus making slightly faster
-      ! convergence
-      ! 3) convergence criteria both on relative and absolute size of CX and on
-      ! relative change in D
-      integer(kind=4),parameter :: maxIterations=50
-      complex(kind=d2p) :: CX ! correction in Newton's iteration method
+      ! 1) convergence criteria on relative and absolute size of CX 
+      ! 2) convergence criteria on relative change in D
+
+      complex(kind=d2p)         :: CX                ! correction in Newton's iteration method
       
       CALL DIFU(2,JMA,IERR)
       IF(IERR.NE.0) solutionIsTooHeavilyDamped = .true.
       !                  ****  START OF ITERATION.  ****
       !if (printDebugInfo) write(*,*) 'START:','. X=',X,'D=',D,'DX=',DX ! DEBUG
-      rootFindingConverged = .false.  ! default assumption
-      iteration_loop: DO I=1,maxIterations
+      loop_iteration: DO I=1,maxIterations
           ADIR=ABS(D)
           IRK=1
-          if (I < 2) then ! first step make only in real direction
-              CX=REALPART(D)/REALPART(DX)
-          else
-              CX=D/DX
-          end if
-          CX=CX*X/(2*CX+X) ! finding zero of (w^2 D), faster convergence
+          CX=D/DX
+          !CX=CX*X/(2*CX+X) ! finding zero of (w^2 D), faster convergence
           irk_loop: do
               X=X-CX
               OME=(X*XA)**2
@@ -215,38 +206,38 @@ SUBROUTINE WHAMP_ENGINE
               CALL DIFU(2,JMA,IERR)
               !if (printDebugInfo) &
               !    & write(*,'(I2,A ,I2 ,A,2E16.8,A,2E16.8 ,A,2E16.8,A,2E16.8)')&
-              !              & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX ! DEBUG
+              !              & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX
               IF(IERR.NE.0) then
                   solutionIsTooHeavilyDamped = .true.
-                  exit iteration_loop
+                  exit loop_iteration
               end if
               IF(ABS(D).LT.ADIR) then
                   if( (ABS(CX).LE.1.E-6*ABS(X)) &    ! relative frequency precision
                       & .or. (ABS(CX) < 1e-6) ) then ! absolute precision
                       rootFindingConverged = .true.
-                      if (I >= 2) then ! at least 2 iteration steps have been made
-                          exit iteration_loop
+                      if (I >= 2) then ! at least 2 steps have been made
+                          exit loop_iteration
                       else
-                          cycle iteration_loop
+                          cycle loop_iteration
                       end if
                   else
-                      cycle iteration_loop
+                      cycle loop_iteration
                   end if 
               else
                   X=X+CX
                   CX=CX/2.
                   if (IRK > 3) then ! check for sitting at local minima
                       if ((ABS(D)-ADIR)/ADIR<1e-5) then
-                          exit iteration_loop
+                          !PRINT*,' Local minima!'
+                          rootFindingConverged = .false.
+                          exit loop_iteration
                       end if
                   end if
                   IRK=IRK+1
-                  IF(IRK.GT.maxIterations) then 
-                      exit iteration_loop
-                  end if
+                  IF(IRK.GT.maxIterations) exit loop_iteration
               end if
           end do irk_loop
-      end do iteration_loop
+      end do loop_iteration
   end subroutine
   subroutine allocate_output_matrices
           ! estimate the size of matrices

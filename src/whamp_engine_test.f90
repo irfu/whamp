@@ -7,11 +7,62 @@ PROGRAM WHAMP
   integer, parameter :: d2p=8
   logical :: isChangedPlasmaModel
   integer :: KFS,J
-  CHARACTER FILENAME*(80)
+  integer           :: narg,iarg
+  character(len=20) :: inputParameter,modelFilename
 
-  printDebugInfo = .true.
+! Default plasma model
+  DN=     [1.0e6, 1.0e6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  TA=     [0.01,  0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  DD=     [1.0,   1.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  AA(:,1)=[5.0,   1.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  AA(:,2)=[0.1,   0.1,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ASS=    [16.0,  0.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  VD=     [1.0,   0.0,   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  XC=     2.79928
+  PZL=    0.0
+  cycleZFirst=1
+  PM=     [0.0, 0.0, 10.0]
+  ZM=     [0.0, 0.0, 10.0]
+  XOI=    .1
 
-  CALL READ_INPUT_FILE(FILENAME)
+! Check command line input parameters
+  narg=command_argument_count()
+  iArg = 1
+  do 
+    if (iArg > narg) exit
+    call get_command_argument(iArg,inputParameter)
+    if (printDebugInfo) write(*,*) "Input parameter:",inputParameter
+    select case(adjustl(inputParameter))
+      case("-help","-h","--help")
+        write(*,*) "usage: whamp [-help] [-debug] [-maxiterations <number>] [-file <modelFilename>] "
+        stop
+      case("-debug")
+        printDebugInfo = .true.
+        if (printDebugInfo) write(*,*)"Enable debugging"
+      case("-file")
+        if (iArg == narg) then
+          write(*,*) "ERROR: File name not given"
+          stop
+        endif
+        iArg = iArg + 1
+        call get_command_argument(iArg,modelFilename)
+        if (printDebugInfo) write(*,*) "Reading file: ",modelFilename 
+        call read_input_file(modelFilename)
+      case("-maxiterations")
+        if (iArg == narg) then
+          write(*,*) "ERROR: maxiterations is not specified"
+          stop
+        endif
+        iArg = iArg + 1
+        call get_command_argument(iArg,inputParameter)
+        read(inputParameter,*) maxIterations
+        if (printDebugInfo) write(*,*) "Max iterations: ",maxIterations
+      case default
+        if (printDebugInfo) write(*,*)"Option '",trim(inputParameter),"' is unknown"
+    end select
+    iArg = iArg + 1
+  end do
+
   call whamp_engine ! call to get plasma parameters only
   !
   plasma_update_loop: do

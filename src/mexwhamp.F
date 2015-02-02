@@ -42,7 +42,7 @@ C     Maximum size = numel
  
 C-----------------------------------------------------------------------
 C     Check for proper number of arguments. 
-      if(nrhs .ne. 12) then
+      if(nrhs .ne. 13) then
          call mexErrMsgIdAndTxt ('MATLAB:matsq:nInput',
      +                           'One input required.')
       elseif(nlhs .ne. 21) then
@@ -87,6 +87,9 @@ C      x_pr = mxGetPr(prhs(1))
       ind = 12
       call input_size(ind)
       call mxCopyPtrToReal8(mxGetPr(prhs(ind)), XOI ,size)
+      ind = 13
+      call input_size(ind)
+      call mxCopyPtrToInteger4(mxGetPr(prhs(ind)),maxIterations,size)
 
 C     Call the computational subroutine.
       call whamp_engine

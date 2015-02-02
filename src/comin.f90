@@ -31,7 +31,7 @@ real(kind=d2p)    :: DEN    ! total electron density
 
 !  ------     root finding parameters
 !
-integer(kind=4)   :: maxIterations=50
+real(kind=4)      :: maxIterations=50
 
 end module comin
 

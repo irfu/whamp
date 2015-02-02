@@ -244,12 +244,8 @@ PROGRAM WHAMP
   end subroutine
   subroutine root_finding
       ! Newton's iteration method with small adjustments:
-      ! 1) First 2 steps are taken only along real direction to avoid
-      ! convergence to some large imaginary frequency solutions
-      ! 2) find roots of (w^2 D) instead of D, thus making slightly faster
-      ! convergence
-      ! 3) convergence criteria both on relative and absolute size of CX and on
-      ! relative change in D
+      ! 1) convergence criteria on relative and absolute size of CX 
+      ! 2) convergence criteria on relative change in D
 
       complex(kind=d2p)         :: CX                ! correction in Newton's iteration method
       
@@ -260,12 +256,8 @@ PROGRAM WHAMP
       loop_iteration: DO I=1,maxIterations
           ADIR=ABS(D)
           IRK=1
-!          if (I < 2) then ! first step make only in real direction
-!              CX=REALPART(D)/REALPART(DX)
-!          else
-              CX=D/DX
-!          end if
-          CX=CX*X/(2*CX+X) ! finding zero of (w^2 D), faster convergence
+          CX=D/DX
+          !CX=CX*X/(2*CX+X) ! finding zero of (w^2 D), faster convergence
           irk_loop: do
               X=X-CX
               OME=(X*XA)**2
@@ -277,7 +269,7 @@ PROGRAM WHAMP
               CALL DIFU(2,JMA,IERR)
               if (printDebugInfo) &
                   & write(*,'(I2,A ,I2 ,A,2E16.8,A,2E16.8 ,A,2E16.8,A,2E16.8)')&
-                            & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX ! DEBUG
+                            & I,'.',IRK,'. X=',X,' CX=',CX,' D=',D ,' DX=',DX
               IF(IERR.NE.0) then
                   solutionIsTooHeavilyDamped = .true.
                   exit loop_iteration
