@@ -1,12 +1,12 @@
-This code has been adopted from the original WHAMP code version 
-to allow model input from files and a few more output parameters. 
-The original WHAMP version  can be downloaded from 
+This code has been adopted from the original WHAMP code version
+to allow model input from files and a few more output parameters.
+The original WHAMP version  can be downloaded from
 http://www.tp.umu.se/forskning/space/WHAMP/
 It is also included under WHAMP_code directory with
 the name "WHAMP.tar.gz_original"
 
-The output parameters from WHAMP (can be specified 
-running WHAMP) are 
+The output parameters from WHAMP (can be specified
+running WHAMP) are
 
 ============ output ===========
         e       (ex,ey,ez)
@@ -27,7 +27,7 @@ running WHAMP) are
         y       energy density and flux of each component
 ================================
 
-the input model file looks like 
+the input model file looks like
 
 ============ Model files ===========
 n(1)  n(2)  ...  n(10)   /per m3/
@@ -53,3 +53,9 @@ and 1eV electrons.
 1.   0.0  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 2.8
 0
+
+
+Making MEX file in MATLAB
+=========================
+>mex libwhamp.a mexwhamp.F
+

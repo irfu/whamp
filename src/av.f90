@@ -28,7 +28,7 @@ SUBROUTINE AV
   integer, parameter :: d2p=kind(1.0d0)
   integer :: I,IB,IERR,J,K
   real(kind=d2p) :: coef,ENFLUXZ,ENFLUXP,ENDEN,ENFIELD,Q 
-  COMPLEX(kind=d2p) :: A,B
+  REAL(kind=d2p) :: A,B
   COMPLEX(kind=d2p) :: XSI(6,4), DF, U1, U2, U3, U12, U13, U32
   COMPLEX(kind=d2p) :: ERG, DDER(3,3), EE(6,4)
   COMPLEX(kind=d2p) :: POYN(3),ENFLZ,ENFLP,DEP(3,3),DEZ(3,3)
@@ -49,12 +49,11 @@ SUBROUTINE AV
   POYN(3)=real(efl(1)*conjg(bfl(2))-efl(2)*conjg(bfl(1)))*coef
 
   ! *** calculate energy in fields
-  A=EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3))    
-  B=BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3))
+  A=REAL(EFL(1)*CONJG(EFL(1))+EFL(2)*CONJG(EFL(2))+EFL(3)*CONJG(EFL(3))) 
+  B=REAL(BFL(1)*CONJG(BFL(1))+BFL(2)*CONJG(BFL(2))+BFL(3)*CONJG(BFL(3)))
   ENFIELD=1.0+B/A*299.79*299.79
 
   ! *** Loop through all species
-
   species_loop: DO J=1,JMA
      !
      !              *********** FORM DIELECTRIC TENSOR ************
@@ -64,18 +63,20 @@ SUBROUTINE AV
      E(4,1)=1.
      E(6,1)=1.
      !
-     !av      DO 135 J=1,JMA
+     !TODO: double check that this does not include vacuum energy
      E(1,1)=E(1,1)-XP(J)
      E(4,1)=E(4,1)-XP(J)
      E(6,1)=E(6,1)-XP(J)
-     IF(AA(J,1).NE.AA(J,2)) GOTO 132
-     AA(J,2)=0.
-     DD(J)=1.
-132  IB=1
+     if (AA(J,1) == AA(J,2)) then 
+         AA(J,2)=0.
+         DD(J)=1.
+     end if
+     IB=1
      DF=XP(J)/(AA(J,1)*(AA(J,1)-AA(J,2)))
      Q=AA(J,1)-DD(J)*AA(J,2)
      IERR=0
-133  CALL CHI(XSI,J,IB,4,IERR)
+iteration_loop:  do
+     CALL CHI(XSI,J,IB,4,IERR)
      IF(IERR.NE.0) RETURN 
      DO K=1,4
         DO I=1,6
@@ -83,12 +84,11 @@ SUBROUTINE AV
         end DO
      end DO
      !
-     IF(IB.EQ.2) GOTO 135
+     IF(IB.EQ.2) exit iteration_loop
      Q=(DD(J)-1.)*AA(J,1)
-     IF(Q.EQ.0.) GOTO 135
+     IF(Q.EQ.0.) exit iteration_loop
      IB=2
-     GOTO 133
-135  CONTINUE
+     end do iteration_loop
      !                       *** DIELECTRIC TENSOR COMPUTED ***
      !
      !       ******* FORM REFRACTIVE INDEX, CV=SPEED OF LIGHT/THERM. SPEED. *
@@ -126,7 +126,7 @@ SUBROUTINE AV
         end DO
      end DO
      !
-     ENDEN=ERG*CONJG(ERG)/(ERG+CONJG(ERG))*2.0-ENFIELD
+     ENDEN=REAL(ERG*CONJG(ERG)/(ERG+CONJG(ERG)))*2.0-ENFIELD
 
      !
      DEZ(1,1)=EE(1,3)
@@ -159,8 +159,8 @@ SUBROUTINE AV
         end DO
      end DO
 
-     ENFLUXZ=ENFLZ*CONJG(ENFLZ)/(ENFLZ+CONJG(ENFLZ))*2.0
-     ENFLUXP=ENFLP*CONJG(ENFLP)/(ENFLP+CONJG(ENFLP))*2.0
+     ENFLUXZ=REAL(ENFLZ*CONJG(ENFLZ)/(ENFLZ+CONJG(ENFLZ)))*2.0
+     ENFLUXP=REAL(ENFLP*CONJG(ENFLP)/(ENFLP+CONJG(ENFLP)))*2.0
 
      A=2.9979e8/CV*8.8542e-12/4.0
      ENFLUXZ=-ENFLUXZ*real(X)/Z*A

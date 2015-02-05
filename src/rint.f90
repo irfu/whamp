@@ -40,8 +40,8 @@ SUBROUTINE RINT(YY,AL,RC)
      SIG=1.
   END IF
   YA=DIMAG(Y)
-  YR=Y
-  UL=PI-2.8d0*Y/(36.d0+Y)
+  YR=real(Y)
+  UL=PI-REAL(2.8d0*Y/(36.d0+Y))
   COT=COS(PI*Y)/SIN(PI*Y)
   D=PI*(1.d0+COT**2)
   C=YR/AL
@@ -56,7 +56,7 @@ SUBROUTINE RINT(YY,AL,RC)
      B=LOG(G+T)
      G=(1.d0/X-C/Z)*G/T
      T=AL*(T*C-1.d0)
-     Z=EXP(X*YA)
+     Z=REAL(EXP(X*YA))
      C=.5*(Z+1.d0/Z)
      S=(0.d0,.5d0)*(Z-1.d0/Z)
      F=COT+G

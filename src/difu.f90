@@ -10,9 +10,6 @@ SUBROUTINE DIFU(KOL,JMAX,IERR)
   use comin
   use comcout
   implicit none
-  !
-  ! find the kind of a high precision variable, by finding 
-  ! the kind of 1.0d0
   integer, parameter :: d2p=kind(1.0d0)
 
   integer :: IB,IERR,J,JMAX,KOL,KOLLA 
@@ -43,7 +40,6 @@ SUBROUTINE DIFU(KOL,JMAX,IERR)
      chi_loop: do 
         CALL CHI(XSI,J,IB,KOL,IERR)
         IF(IERR.NE.0) RETURN 
-        if (kol .eq. 5) call epsgrad(xsi, df, q, j, ib)
         E(1:6,1:KOLLA)=E(1:6,1:KOLLA)+DF*Q*XSI(1:6,1:KOLLA)
         !
         IF(IB.EQ.2) cycle species_loop

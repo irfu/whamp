@@ -1,18 +1,12 @@
-!**************************************************************
-!
-! File rasy.f 
-
+! Assymptotic series estimate
 SUBROUTINE RASY(Y,AL,RC)
-  ! find the kind of a high precision variable, by finding 
-  ! the kind of 1.0d0
   implicit none
   integer, parameter :: d2p=kind(1.0d0)
   integer :: M,N
   real(kind=d2p) :: A,AL,AY,C,T
-
   COMPLEX(kind=d2p) :: Y,Y2,COT,P,PY,PP,PPY,PN,PYN,QN,QYN,RC(2,2)
-  !          ******** ASYMPTOTIC SERIES ********
   real(kind=d2p),parameter :: PI=3.14159265358979_d2p
+  
   Y2=Y*Y
   COT=COS(PI*Y)/SIN(PI*Y)
   !                  1.E99 IS TOO BIG FOR S/370 HARDWARE. SET TO LARGEST
@@ -37,11 +31,11 @@ SUBROUTINE RASY(Y,AL,RC)
      PN =PN*(M*M-Y2)/((2*M+1)*AL)
      QYN=(QYN*((M+.5)**2-Y2)-2.*Y2*QN)/(2.*N*AL)
      QN =QN*((M+.5)**2-Y2)/(2.*N*AL)
-     IF(M.LT.AY) then !GOTO 3
+     IF(M.LT.AY) then 
      else
         C=N*(ABS(PN)+ABS(QN))
-        IF(C.LE.1.E-7*ABS(PP)) exit iteration !GOTO 5
-        IF(C.GE.T) exit iteration             !GOTO 5
+        IF(C.LE.1.E-7*ABS(PP)) exit iteration 
+        IF(C.GE.T)             exit iteration             
      end if
      P  =P  + PN  + QN
      PY =PY + PYN + QYN

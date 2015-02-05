@@ -1,0 +1,15 @@
+*.o
+*.DS_Store
+*.asv
+*.aux
+*.log
+*.out
+*.synctex.gz
+src/*.mod
+src/whamp
+src/whamptest
+src/whamp_engine_test
+src/mexwhamp*
+src/libwhamp*
+
+
