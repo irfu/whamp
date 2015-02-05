@@ -1,6 +1,10 @@
 *.o
 *.DS_Store
 *.asv
+*.aux
+*.log
+*.out
+*.synctex.gz
 src/*.mod
 src/whamp
 src/whamptest
