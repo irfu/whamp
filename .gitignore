@@ -3,4 +3,9 @@
 *.asv
 src/*.mod
 src/whamp
+src/whamptest
+src/whamp_engine_test
+src/mexwhamp*
+src/libwhamp*
+
 
