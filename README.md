@@ -9,4 +9,4 @@ Package includes also a matlab code to run WHAMP from inside MATLAB
 and to visualize distribution functions.
 
 Some articles that use WHAMP:
-http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library&libname=WHAMP&libid=47d8e59e80
+https://ui.adsabs.harvard.edu/public-libraries/Iw3OYJ1iQa2WSeG8SfHxyg
