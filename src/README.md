@@ -62,5 +62,5 @@ Making MEX file in MATLAB
 ```bash
 $ make
 $ matlab
->> mex libwhamp.a mexwhamp.F
+>> mex -R2017b libwhamp.a mexwhamp.F
 ```
