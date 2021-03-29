@@ -27,18 +27,12 @@ C     Function declarations:
       mwPointer, external :: mxGetM, mxGetN
  
 C     Pointers to input/output mxArrays:
-      mwPointer x_pr, y_pr, y_pi
+      mwPointer x_pr       ! input
+      mwPointer y_pr, y_pi ! output
  
 C     Array information:
-      !mwPointer m, n
       mwSize m, n
       mwSize size
- 
-C     Arguments for computational routine:
-C     Maximum size = numel
-      integer*4 numel
-      parameter(numel = 1000)
-      real*8  x(numel), y(numel)
  
 C-----------------------------------------------------------------------
 C     Check for proper number of arguments. 
@@ -53,43 +47,56 @@ C     Check for proper number of arguments.
 C      x_pr = mxGetPr(prhs(1))
       ind = 1
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), XC ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, XC, size)
       ind = 2
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), PZL ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, PZL, size)
       ind = 3
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), cycleZFirst ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, cycleZFirst, size)
       ind = 4
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), DN ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, DN, size)
       ind = 5
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), TA ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, TA, size)
       ind = 6
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), DD ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, DD, size)
       ind = 7
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), AA ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, AA, size)
       ind = 8
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), ASS ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, ASS, size)
       ind = 9
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), VD ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, VD, size)
       ind = 10
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), PM ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, PM, size)
       ind = 11
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), ZM ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, ZM, size)
       ind = 12
       call input_size(ind)
-      call mxCopyPtrToReal8(mxGetPr(prhs(ind)), XOI ,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToReal8(x_pr, XOI, size)
       ind = 13
       call input_size(ind)
-      call mxCopyPtrToInteger4(mxGetPr(prhs(ind)),maxIterations,size)
+      x_pr = mxGetPr(prhs(ind))
+      call mxCopyPtrToInteger4(x_pr,maxIterations,size)
 
 C     Call the computational subroutine.
       call whamp_engine
@@ -208,17 +215,6 @@ C     Get the size of the input array.
       n = mxGetN(prhs(ind))
       size = m*n
 
-C     Column * row must be smaller than numel
-C      if(size .gt. numel) then
-C         call mexErrMsgIdAndTxt ('MATLAB:matsq:mSize',
-C     +                           'Row * column must be <= 1000.')
-C      endif
-      
-C     Check that the array is numeric (not strings).
-C      if(mxIsNumeric(prhs(ind)) .eq. 0) then
-C         call mexErrMsgIdAndTxt ('MATLAB:matsq:NonNumeric',
-C     +                           'Input must be a numeric array.')
-C      endif
       end !input_size
       
       end
