@@ -13,7 +13,7 @@ BINDIR = .
 
 FFLAGS = -c -Wall -fPIC
 
-all: whamp whampengine whampenginetest
+all: whamp libwhamp.a whamp_engine_test
 
 # General rule (most f90 built separatly)
 %.o: %.f90
@@ -48,11 +48,11 @@ OBJSLIB = whamp_engine.o comin.o comoutput.o\
 whamp:  ${OBJS}
 	${LD} ${OBJS} -o ${BINDIR}/$@
 
-whampenginetest: ${OBJSTEST}
-	${LD} ${OBJSTEST} -o ${BINDIR}/whamp_engine_test
+whamp_engine_test: ${OBJSTEST}
+	${LD} ${OBJSTEST} -o ${BINDIR}/$@
 
-whampengine: ${OBJSLIB}
-	${AR} libwhamp.a ${OBJSLIB}
+libwhamp.a: ${OBJSLIB}
+	${AR} $@ ${OBJSLIB}
 
 
 # Clean up everything
