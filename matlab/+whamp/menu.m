@@ -19,8 +19,8 @@ while(k~=0)  % ==== MAIN LOOP ====
     clear q;
     disp('Loading wh file into variable wh');
     q=input('File name (default ./wh):','s');
-    if size(q) eval(['load ' q '; wh=' q ';']);
-    else load .\wh;
+    if size(q), eval(['load ' q '; wh=' q ';']);
+    else, load .\wh;
     end
     clear q;
     disp('preparing p,z vectors and f,fim matrices')
@@ -89,8 +89,8 @@ while(k~=0)  % ==== MAIN LOOP ====
       s = size(wh);
       q3 = 13841^2*5.686e-12/2;
       q4=input('e,H,O (default-e) >','s');
-      if ((q4 == 'H') | (q4 == 'h')) q3=q3*1836.2;end
-      if ((q4 == 'O') | (q4 == 'o')) q3=q3*1836.2*4;end
+      if ((q4 == 'H') | (q4 == 'h')), q3=q3*1836.2; end
+      if ((q4 == 'O') | (q4 == 'o')), q3=q3*1836.2*4; end
       wh(:,s(2)+1)=log10((wh(:,3)./wh(:,2)).^2*q3);
       [d1,d2,d3,xx]=whamp.m2xyz(wh(:,[1 2 3 s(2)+1]));
     end
@@ -119,7 +119,7 @@ while(k~=0)  % ==== MAIN LOOP ====
       colorbar;
     end
     if q2 == 2
-      cc = caxis	% use default caxis
+      cc = caxis;	% use default caxis
       q3=input('For min/max input 0/1');
       if q3==0, cc(1)=-min(abs(cc));cc(2)=min(abs(cc));end
       if q3==1, cc(1)=-max(abs(cc));cc(2)=max(abs(cc));end
@@ -148,9 +148,9 @@ while(k~=0)  % ==== MAIN LOOP ====
   end
   if k==7 % ========================== k=7 ===
     zp_scale=irf_ask('lin/log scale [%]','zp_scale','lin');
-    if zp_scale == 'lin', z=zlin;p=plin;zlabel='k_{par}';plabel='k_{perp}';
-    elseif zp_scale == 'log', z=zlog;p=plog;zlabel='log_{10} k_{par}';plabel='log_{10} k_{perp}';
-    else disp(['scale not changed. scale: ' zp_scale]);
+    if strcmp(zp_scale, 'lin'), z=zlin;p=plin;zlabel='k_{par}';plabel='k_{perp}';
+    elseif strcmp(zp_scale, 'log'), z=zlog;p=plog;zlabel='log_{10} k_{par}';plabel='log_{10} k_{perp}';
+    else, disp(['scale not changed. scale: ' zp_scale]);
     end
   end
   if k==8 % ========================== k=8 ===
@@ -161,14 +161,14 @@ while(k~=0)  % ==== MAIN LOOP ====
       hold on; disp(' HOLD ON ')
     else
       hold off; disp('HOLD OFF')
-    end;
+    end
   end
   if k==10 % ========================== k=10 ===
-    q2 = ['disp(''matlab session, q-exit'')'];
+    q2 = 'disp(''matlab session, q-exit'')';
     while(q2~='q')
       eval(q2);
       q2=input('matlab>','s');
-    end;
+    end
   end
 end % ==== MAIN LOOP ====
 

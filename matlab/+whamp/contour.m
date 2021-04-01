@@ -16,7 +16,7 @@ if q2=='c'
   if ((q1 == 1) | (q1==2))
     q2=input('Number of levels?');
     if q1==1,cs=whamp.contour(p,z,f,q2);
-    else cs=whamp.contour(p,z,log10(f),q2);
+    else, cs=whamp.contour(p,z,log10(f),q2);
     end
   end
   if q1 >2
@@ -36,7 +36,7 @@ else
   colorbar;
   clear q2
   q2 = input('Color axis (if nothing automatically) cmin cmax =','s');
-  if (length(q2)~=0)
+  if (~isempty(q2))
     caxis(eval(['[' q2 ']']));
   else
     caxis('auto')
