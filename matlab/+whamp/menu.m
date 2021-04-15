@@ -34,7 +34,7 @@ while(k~=0)  % ==== MAIN LOOP ====
     load .\wh
     for i1=1:length(wh(:,1))
       for i2=1:length(wh_temp(:,1))
-        if ((wh(i1,1)==wh_temp(i2,1)) & (wh(i1,2)==wh_temp(i2,2)))
+        if ((wh(i1,1)==wh_temp(i2,1)) && (wh(i1,2)==wh_temp(i2,2)))
           wh_temp(i2,:)=wh(i1,:);
         end
       end
@@ -89,8 +89,8 @@ while(k~=0)  % ==== MAIN LOOP ====
       s = size(wh);
       q3 = 13841^2*5.686e-12/2;
       q4=input('e,H,O (default-e) >','s');
-      if ((q4 == 'H') | (q4 == 'h')), q3=q3*1836.2; end
-      if ((q4 == 'O') | (q4 == 'o')), q3=q3*1836.2*4; end
+      if strcmpi(q4, 'H'), q3=q3*1836.2; end
+      if strcmpi(q4, 'O'), q3=q3*1836.2*4; end
       wh(:,s(2)+1)=log10((wh(:,3)./wh(:,2)).^2*q3);
       [d1,d2,d3,xx]=whamp.m2xyz(wh(:,[1 2 3 s(2)+1]));
     end
@@ -125,7 +125,7 @@ while(k~=0)  % ==== MAIN LOOP ====
       if q3==1, cc(1)=-max(abs(cc));cc(2)=max(abs(cc));end
       caxis(cc);
       
-      cm = [cc(1):(cc(2)-cc(1))/100:cc(2)];
+      cm = cc(1):(cc(2)-cc(1))/100:cc(2);
       cm = rot90(cm,-1);
       xcm = ones(length(cm),3);	% colormap matrice
       q1=input('gray scale y/n? ','s');
