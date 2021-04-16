@@ -36,8 +36,10 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           # Artifact name
-          name: libwhamp.a
-          path: src/libwhamp.a
+          name: builtWhamp
+          path: |
+          src/libwhamp.a
+          src/*.mod
           # And only keep it for 1 day
           retention-days: 1
   matlab:
@@ -57,12 +59,12 @@ jobs:
       - name: Download artifact from build
         uses: actions/download-artifact@v2
         with:
-          name: libwhamp.a
-          path: src/libwhamp.a
+          name: builtWhamp
+          path: src/
 
       # in dir "src", try to build the mex file with help of the artifact
       - name: Run commands
         uses: matlab-actions/run-command@v0
         with:
-          command: cd('src'); mex -R2017b libwhamp.a mexwhamp.F;
+          command: cd('src'); mex -R2017b libwhamp.a mexwhamp.F; movefile('mexwhamp.mexa64', '../matlab/+whamp/mexwhamp.mexa64'); cd('../matlab'); addpath(pwd);
 
