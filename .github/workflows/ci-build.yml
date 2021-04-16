@@ -38,8 +38,10 @@ jobs:
           # Artifact name
           name: builtWhamp
           path: |
-          src/libwhamp.a
-          src/*.mod
+            src/libwhamp.a
+            src/comcout.mod
+            src/comin.mod
+            src/comoutput.mod
           # And only keep it for 1 day
           retention-days: 1
   matlab:
