@@ -1,6 +1,6 @@
 WHAMP
 =====
-![ci-build-status](https://github.com/irfu/whamp/actions/workflows/ci-build.yml/badge.svg)
+[![ci-build](https://github.com/irfu/whamp/actions/workflows/ci-build.yml/badge.svg)](https://github.com/irfu/whamp/actions/workflows/ci-build.yml)
 
 WHAMP - Waves in Homogeneous Anisotropic Magnetized Plasma.
 Fortran code, originally written by Kjell Rönnmark, that calculates
