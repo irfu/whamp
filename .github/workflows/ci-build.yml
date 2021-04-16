@@ -23,6 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
       - uses: actions/checkout@v2
 
       # Runs a set of commands using the runners shell
@@ -30,3 +31,13 @@ jobs:
         run: |
           cd src
           make
+
+      # Upload artifact
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          # Artifact name
+          name: libwhamp.a
+          path: src/libwhamp.a
+          # And only keep it for 1 day
+          retention-days: 1
