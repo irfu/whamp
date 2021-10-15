@@ -154,7 +154,7 @@ PROGRAM WHAMP
               XI=DIMAG(X)
               VG(1)=-real(DP/DX)
               VG(2)=-real(DZ/DX)
-              RI=SQRT(P**2+Z**2)*CV/real(X)  ! refractive index
+              RI=SQRT(P**2+Z**2)*CV/X  ! refractive index
               IF(VG(1).NE.0.) SG(1)=XI/VG(1)
               IF(VG(2).NE.0.) SG(2)=XI/VG(2)
               !          ****  PRINT THE RESULTS.  ****
