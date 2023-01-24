@@ -1,0 +1,40 @@
+# This CITATION.cff file was generated with cffinit.
+# See https://citation-file-format.github.io/
+# 
+# Added here to help avoid confusion as per
+# https://github.com/irfu/whamp/issues/1
+
+cff-version: 1.2.0
+title: WHAMP - Waves in Homogeneous Anisotropic Magnetized Plasma
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+repository-code: "https://github.com/irfu/whamp"
+authors:
+  - given-names: "Kjell"
+    family-names: "Rönnmark"
+    affiliation: "Kiruna Geophysical Institute, University of Umeå"
+    country: SE
+  - given-names: "Andris"
+    family-names: "Vaivads"
+    orcid: "https://orcid.org/0000-0003-1654-841X"
+  - given-names: "David"
+    family-names: "Sundkvist"
+  - given-names: "Thomas"
+    family-names: "Nilsson"
+    affiliation: "IRF Uppsala, Sweden"
+    orcid: "https://orcid.org/0000-0001-9604-6377"
+preferred-citation:
+  type: report
+  authors:
+  - family-names: "Rönnmark"
+    given-names: "Kjell"
+    affiliation: "Kiruna Geophysical Institute, University of Umeå"
+    country: SE
+  year-original: 1982
+  journal: "KGI Report"
+  issn: "0347-6405"
+  month: 6
+  title: "WHAMP- Waves in Homogeneous, Anisotropic, Magnetized Plasma"
+  issue: 179
