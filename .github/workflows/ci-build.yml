@@ -55,7 +55,7 @@ jobs:
 
       # Install MATLAB (GitHub action provided by MathWorks)
       - name: Install MATLAB
-        uses: matlab-actions/setup-matlab@v0
+        uses: matlab-actions/setup-matlab@v1
 
       # Download artifact from "build"
       - name: Download artifact from build
