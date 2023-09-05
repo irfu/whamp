@@ -67,7 +67,7 @@ jobs:
       # in dir "src", try to build the mex file with help of the artifact
       # and verify it works as inteded (by test_whamp_module.m)
       - name: Run commands
-        uses: matlab-actions/run-command@v0
+        uses: matlab-actions/run-command@v1
         with:
           command: cd('src'); mex -R2017b libwhamp.a mexwhamp.F; movefile('mexwhamp.mexa64', '../matlab/+whamp/mexwhamp.mexa64'); cd('../matlab'); addpath(pwd); test=whamp.test_whamp_module; assertSuccess(test.run);
 
