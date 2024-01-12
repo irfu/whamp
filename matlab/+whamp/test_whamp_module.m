@@ -32,7 +32,7 @@ classdef test_whamp_module < matlab.unittest.TestCase
       'maxIterations', 50);
     output = [];
   end
-  
+
   methods (Test)
     function verify_empty_default_run(testCase)
       %% Verify empty inputs gets default values
