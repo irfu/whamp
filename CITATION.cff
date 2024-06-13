@@ -15,6 +15,7 @@ authors:
   - given-names: "Kjell"
     family-names: "Rönnmark"
     affiliation: "Kiruna Geophysical Institute, University of Umeå"
+    orcid: "https://orcid.org/0000-0003-4507-3353"
     country: SE
   - given-names: "Andris"
     family-names: "Vaivads"
@@ -32,6 +33,7 @@ preferred-citation:
   - family-names: "Rönnmark"
     given-names: "Kjell"
     affiliation: "Kiruna Geophysical Institute, University of Umeå"
+    orcid: "https://orcid.org/0000-0003-4507-3353"
     country: SE
   year: 1982
   journal: "KGI Report"
