@@ -1,12 +1,13 @@
 This code has been adopted from the original WHAMP code version
 to allow model input from files and a few more output parameters.
-The original WHAMP version  can be downloaded from
+The original WHAMP version can be downloaded from
 [http://www.tp.umu.se/forskning/space/WHAMP/](http://www.tp.umu.se/forskning/space/WHAMP/).
 It is also included under [Archive](../Archive) directory with
 the name "[WHAMP.tar.gz_original](../Archive/WHAMP.tar.gz_original)".
 
 The output parameters from WHAMP (can be specified
 running WHAMP) are:
+
 ```
 ============ output ===========
         e       (ex,ey,ez)
@@ -27,7 +28,9 @@ running WHAMP) are:
         y       energy density and flux of each component
 ================================
 ```
+
 the input model file looks like:
+
 ```
 ============ Model files ===========
 n(1)  n(2)  ...  n(10)        / per m3 /
@@ -41,9 +44,11 @@ fce                           / electron gyrofrequency in kHz /
 pzl                           / 1 - log scale, 0 - linear scale /
 =====================================
 ```
+
 Plasma with `B=100nT`, `n=1cm-3`, there are only
 oxygen ions (`Tperp=50eV`, `Tpar=10eV`, `vd=1*vt_par`)
 and `1eV` electrons.
+
 ```
 ============ Example_Input_File would have 9 lines ===========
 1.e6 1.e6 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
@@ -57,8 +62,8 @@ and `1eV` electrons.
 0
 ```
 
-Making MEX file in MATLAB
-=========================
+# Making MEX file in MATLAB
+
 ```bash
 $ make
 $ matlab
