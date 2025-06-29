@@ -1,0 +1,19 @@
+# WHAMP plasma model file - Example 3
+# Density values (m^-3) for 10 species
+1.4e6 1.4e6 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+# Temperature values (eV) for 10 species  
+.002  .002 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+# Loss cone parameter D for 10 species
+1.   1.   1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 
+# Temperature anisotropy A for 10 species
+1.   1.   1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 
+# Loss cone parameter B for 10 species
+0.0  0.0  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+# Atomic mass for 10 species (0=electron, 1=proton, etc.)
+0.  1.0  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+# Drift velocity for 10 species
+0.   .0  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+# Gyrofrequency (kHz)
+3.3
+# PZL parameter
+0

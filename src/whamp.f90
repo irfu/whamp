@@ -10,8 +10,12 @@ PROGRAM WHAMP
    logical           :: isChangedPlasmaModel
    real(kind=d2p)    :: REN(10)    ! particle mass expressed in masses of first particles
    real(kind=d2p)    :: RN         ! mass of first particle in electron masses
+   real(kind=d2p)    :: PXN        ! plasma frequency of species 1
+   real(kind=d2p)    :: BETA       ! beta of the first species, ratio of thermal velocity to gyrofrequency 
+   real(kind=d2p)    :: VTH        ! thermal velocity of the first species over speed of light
+   real(kind=d2p)    :: REDN       ! density of first particle times m_e/m_s
    real(kind=d2p)    :: ADIR       ! abs(D)
-   real(kind=d2p)    :: DEK, DKP, DKZ, KV, PFQ, PLG, PLO, PO, PVO
+   real(kind=d2p)    :: DEK, DET, DKP, DKZ, KV, PFQ, PLG, PLO, PO, PVO
    real(kind=d2p)    :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO, ZVO
    COMPLEX(kind=d2p) :: XO, XVO, ddDX, OME, FPX, DOX, DOZ, DOP
    DIMENSION T(10), ST(10)
@@ -19,15 +23,15 @@ PROGRAM WHAMP
    character(len=20) :: inputParameter, modelFilename
 
 ! Default plasma model
-   DN = [1.0e6, 1.0e6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   TA = [0.01, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   DD = [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   AA(:, 1) = [5.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   AA(:, 2) = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   ASS = [16.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   VD = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-   XC = 2.79928
-   PZL = 0.0
+   DN = [1.0e6, 1.0e6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] !  density in m-3
+   TA = [0.01, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ! temperature in eV
+   DD = [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ! loss cone parameter, default 1.0 (no loss cone)
+   AA(:, 1) = [5.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ! t_perp/t_par ratio, default 1.0
+   AA(:, 2) = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ! default 0, i.e. no loss cone
+   ASS = [16.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] !/ 0-electrons, 1-protons, 16-oxygen
+   VD = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ! v_drift/v_term
+   XC = 2.79928 ! electron gyrofrequency in kHz 
+   PZL = 0.0 ! 1 - log scale, 0 - linear scale
    cycleZFirst = 1
    PM = [0.0, 0.0, 10.0]
    ZM = [0.0, 0.0, 10.0]
@@ -76,34 +80,41 @@ PROGRAM WHAMP
 
    loop_plasma_update: do
       isChangedPlasmaModel = .false. ! changed to .true. in code when new plasma parameters are entered
-      DEN = 0.d+0
+      DEN = 0.d+0 ! total electron density?
       RED = 0.d+0
       loop_species: DO J = 1, 10
-         REN(J) = 1836.1*ASS(J)
+         REN(J) = 1836.1*ASS(J) ! mass of the particle normalized to m_e, TODO: check for hardcoded m_i/m_e
          IF (REN(J) .EQ. 0.) REN(J) = 1.
-         T(J) = TA(J)/TA(1)
-         IF (DN(J) .EQ. 0.) cycle loop_species
-         JMA = J
-         RED = RED + DN(J)/REN(J)
+         T(J) = TA(J)/TA(1) ! temperature of species normalized by species 1 temperature
+         IF (DN(J) .EQ. 0.) cycle loop_species ! ignore 0 density species
+         JMA = J ! count how many species there are until we hit 0 in DN
+         RED = RED + DN(J)/REN(J) ! m_e*( n_e/m_e + n_i/m_i + ... )
          IF (ASS(J) .EQ. 0.) DEN = DEN + DN(J)
       end do loop_species
+
+      
       !
-      RN = REN(1)
+      RN = REN(1) ! mass of the first species particle normalized to m_e
+      REDN = DN(1)/RN ! density of the first species times m_e/m_s
       !                  ****  NORMALIZED TEMPERATURES AND VELOCITIES.  ****
       DO J = 1, JMA
-         REN(J) = REN(J)/RN
-         T(J) = T(J)*REN(J)
-         ST(J) = SQRT(T(J))
+         REN(J) = REN(J)/RN ! normalize mass of the particle to the first species particle
+         T(J) = T(J)*REN(J) ! Temperature times normalized mass (by species 1)
+         ST(J) = SQRT(T(J)) ! sqrt of normalized temperature (by species 1) times charge
       end do
-      !
-      DEK = 12405._d2p
+      ! We are computing frequncy in kHz which is why we need 10^6 multiplier
+      DEK = 12405._d2p ! 10^6 * 4 pi^2 m_e epsilon_0 / e^2 = 12404.4
       PFQ = RED/DEK
-      PX = SQRT(PFQ)
-      XA = XC/RN
-      TR = TA(1)/RN
+      PX = SQRT(PFQ) ! plasma frequency measured in Hz = sum_s (n_s e^2)/(m_s epsilon_0) (see Fitzpatrick Introduction to Plasmas, equation 5.33)
+      PXN = SQRT(REDN/DEK) !  plasma frequency of species 1
+      XA = XC/RN ! gyrofrequency of the first species to which dispersion relation will be normalized
+      TR = TA(1)/RN ! temperature of the first species divided by its mass over m_e ratio
       CV = TR*(1022._d2p + TR)/(511._d2p + TR)**2
       CV = 1./SQRT(CV)
       DEK = DEK*RN
+      DET = 255.499_d2p ! 0.001 c^2 m_e/ 2 e (becuse T is measured in keV)
+      VTH = SQRT(TR/DET) ! thermal velocity over speed of light of the first species
+      BETA = VTH*PXN/XA ! beta of the first species, ratio of thermal velocity to gyrofrequency
       !
       call print_plasma_parameters()
       !                  ****  ASK FOR INPUT!  ****
@@ -135,7 +146,7 @@ PROGRAM WHAMP
                XP(J) = DN(J)/DEK/REN(J)/OME
             end do
             !
-            solutionIsTooHeavilyDamped = .false. ! default not heaviily damped
+            solutionIsTooHeavilyDamped = .false. ! default not heavily damped
             rootFindingConverged = .false. ! default no convergence
             call root_finding
             !
@@ -230,14 +241,17 @@ PROGRAM WHAMP
 contains
    subroutine print_plasma_parameters
       !                  ****  PRINT PLASMA PARAMETERS.  ****
-      PRINT 101, PX, XC, DEN
-101   FORMAT('# PLASMA FREQ.:', F11.4,&
-             & 'KHZ GYRO FREQ.:', F10.4, 'KHZ   ',&
-             & 'ELECTRON DENSITY:', 1PE11.5, 'M-3')
+      PRINT 101, PX, XA, PXN
+101   FORMAT('# TOTAL PLASMA FREQ.:', F11.5,&
+             & ' KHZ; SPEC 1 GYRO FREQ.:', F10.5, ' KHZ; ',&
+             & 'SPEC 1 PLASMA FREQ.:', F11.5, ' KHZ; ')
+      PRINT 102, VTH, BETA
+102   FORMAT('# SPECIES 1 V_TH/C:', F11.6, &
+             & ';  SPECIES 1 BETA:', F11.6, ' (ratio of thermal velocity to gyrofrequency)')
       DO J = 1, JMA
-102      FORMAT('# ', A3, '  DN=', 1PE12.5, '  T=', 0PF9.5, '  D=', F4.2,&
+103      FORMAT('# ', A3, '  DN=', 1PE12.5, '  T=', 0PF9.5, '  D=', F4.2,&
                 &'  A=', F4.2, '  B=', F4.2, ' VD=', F5.2)
-         PRINT 102, species_symbol(ASS(J)), DN(J), TA(J), DD(J), AA(J, 1), AA(J, 2), VD(J)
+         PRINT 103, species_symbol(ASS(J)), DN(J), TA(J), DD(J), AA(J, 1), AA(J, 2), VD(J)
       end do
       !
    end subroutine
