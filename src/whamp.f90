@@ -102,19 +102,19 @@ PROGRAM WHAMP
          T(J) = T(J)*REN(J) ! Temperature times normalized mass (by species 1)
          ST(J) = SQRT(T(J)) ! sqrt of normalized temperature (by species 1) times charge
       end do
-      ! We are computing frequncy in kHz which is why we need 10^6 multiplier
+      ! We are computing frequncy in kHz which is why we need 10^6 multiplier and (2pi)^2
       DEK = 12405._d2p ! 10^6 * 4 pi^2 m_e epsilon_0 / e^2 = 12404.4
       PFQ = RED/DEK
       PX = SQRT(PFQ) ! plasma frequency measured in Hz = sum_s (n_s e^2)/(m_s epsilon_0) (see Fitzpatrick Introduction to Plasmas, equation 5.33)
       PXN = SQRT(REDN/DEK) !  plasma frequency of species 1
-      XA = XC/RN ! gyrofrequency of the first species to which dispersion relation will be normalized
+      XA = XC/RN ! gyrofrequency of the first species 1 to which dispersion relation will be normalized
       TR = TA(1)/RN ! temperature of the first species divided by its mass over m_e ratio
       CV = TR*(1022._d2p + TR)/(511._d2p + TR)**2
       CV = 1./SQRT(CV)
       DEK = DEK*RN
       DET = 255.499_d2p ! 0.001 c^2 m_e/ 2 e (becuse T is measured in keV)
       VTH = SQRT(TR/DET) ! thermal velocity over speed of light of the first species
-      BETA = VTH*PXN/XA ! beta of the first species, ratio of thermal velocity to gyrofrequency
+      BETA = (VTH*PXN/XA)**2 ! beta of the first species, ratio of thermal velocity to gyrofrequency
       !
       call print_plasma_parameters()
       !                  ****  ASK FOR INPUT!  ****
@@ -246,8 +246,8 @@ contains
              & ' KHZ; SPEC 1 GYRO FREQ.:', F10.5, ' KHZ; ',&
              & 'SPEC 1 PLASMA FREQ.:', F11.5, ' KHZ; ')
       PRINT 102, VTH, BETA
-102   FORMAT('# SPECIES 1 V_TH/C:', F11.6, &
-             & ';  SPECIES 1 BETA:', F11.6, ' (ratio of thermal velocity to gyrofrequency)')
+102   FORMAT('# SPECIES 1 parallel V_TH/C:', F11.6, &
+             & ';  SPECIES 1 parallel BETA:', F11.6)
       DO J = 1, JMA
 103      FORMAT('# ', A3, '  DN=', 1PE12.5, '  T=', 0PF9.5, '  D=', F4.2,&
                 &'  A=', F4.2, '  B=', F4.2, ' VD=', F5.2)
