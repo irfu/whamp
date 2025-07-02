@@ -11,7 +11,6 @@ PROGRAM WHAMP
    real(kind=d2p)    :: REN(10)    ! particle mass expressed in masses of first particles
    real(kind=d2p)    :: RN         ! mass of first particle in electron masses
    real(kind=d2p)    :: PXN        ! plasma frequency of species 1
-   real(kind=d2p)    :: BETA       ! beta of the first species, ratio of thermal velocity to gyrofrequency 
    real(kind=d2p)    :: VTH        ! thermal velocity of the first species over speed of light
    real(kind=d2p)    :: REDN       ! density of first particle times m_e/m_s
    real(kind=d2p)    :: ADIR       ! abs(D)
@@ -46,7 +45,7 @@ PROGRAM WHAMP
       if (printDebugInfo) write (*, *) "Input parameter:", inputParameter
       select case (adjustl(inputParameter))
       case ("-help", "-h", "--help")
-         write (*, *) "usage: whamp [-help] [-debug] [-maxiterations <number>] [-file <modelFilename>] "
+         write (*, *) "usage: whamp [-help] [-debug] [-maxiterations <number>] [-file <modelFilename>] [-outfile <outputFilename>]"
          stop
       case ("-debug")
          printDebugInfo = .true.
@@ -60,6 +59,14 @@ PROGRAM WHAMP
          call get_command_argument(iArg, modelFilename)
          if (printDebugInfo) write (*, *) "Reading file: ", modelFilename
          call read_input_file(modelFilename)
+      case ("-outfile")
+         if (iArg == narg) then
+            write (*, *) "ERROR: Output file name not given"
+            stop
+         end if
+         iArg = iArg + 1
+         call get_command_argument(iArg, output_filename)
+         if (printDebugInfo) write (*, *) "Output file: ", trim(output_filename)
       case ("-maxiterations")
          if (iArg == narg) then
             write (*, *) "ERROR: maxiterations is not specified"
@@ -122,6 +129,13 @@ PROGRAM WHAMP
          !for new plasma skip calling typin until convergence checked
          if (.not. isChangedPlasmaModel) call TYPIN(isChangedPlasmaModel, KFS)
          if (isChangedPlasmaModel) cycle loop_plasma_update
+
+         ! Add quit check here
+         if (KFS == 999) then  ! Use 999 as quit signal from TYPIN
+            write(*, *) 'Quitting program...'
+            stop
+         end if
+
          isChangedPlasmaModel = .false.
          KV = 1
          PLG = PM(1)

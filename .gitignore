@@ -4,6 +4,7 @@
 *.aux
 *.log
 *.out
+*.txt
 *.synctex.gz
 src/*.mod
 src/whamp
