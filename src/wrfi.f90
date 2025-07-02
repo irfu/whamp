@@ -96,7 +96,7 @@ SUBROUTINE WRFI(IAR)
          OPEN (10, FILE=OFIL, ERR=40)
          IFS = 1
 
-         rn = 1836.1*ass(1)
+         rn = mi_o_me*ass(1)
          if (rn .lt. 1.) rn = 1.
          gf = 1000.*xc/rn
          vth = sqrt(3.517388e14*ta(1)/rn)

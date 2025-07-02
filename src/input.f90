@@ -2,6 +2,7 @@ SUBROUTINE read_input_file(FILENAME)
    use comin
    use comcout
    implicit none
+   integer, parameter :: d2p = 8  ! Define d2p parameter
    integer :: I, ioerr, LU = 16
    CHARACTER*(*) FILENAME
    character(len=200) :: line
@@ -28,6 +29,8 @@ SUBROUTINE read_input_file(FILENAME)
       call skip_comments_and_read(LU, VD)
       call skip_comments_and_read_single(LU, XC)
       call skip_comments_and_read_single(LU, PZL)
+      ! Try to read mi_o_me, if not present or error, use default
+      call skip_comments_and_read_single_optional(LU, mi_o_me, 1836.1_d2p)
 
       CLOSE (LU)
       RETURN
@@ -50,6 +53,33 @@ contains
          if (line(1:1) == '#' .or. line(1:1) == '!') cycle  ! skip comments
          read(line, *, iostat=ioerr) var
          if (ioerr == 0) exit
+      end do
+   end subroutine
+
+   subroutine skip_comments_and_read_single_optional(unit, var, default_val)
+      integer, intent(in) :: unit
+      real(kind=d2p), intent(out) :: var
+      real(kind=d2p), intent(in) :: default_val
+      character(len=200) :: line
+      
+      ! Set default value first
+      var = default_val
+      
+      do
+         read(unit, '(A)', iostat=ioerr) line
+         if (ioerr /= 0) then
+            ! End of file reached, use default
+            if (printDebugInfo) write(*, *) '# mi_o_me not found in file, using default: ', default_val
+            return
+         end if
+         line = adjustl(line)
+         if (len_trim(line) == 0) cycle  ! skip empty lines
+         if (line(1:1) == '#' .or. line(1:1) == '!') cycle  ! skip comments
+         read(line, *, iostat=ioerr) var
+         if (ioerr == 0) then
+            if (printDebugInfo) write(*, *) '# mi_o_me read from file: ', var
+            exit
+         end if
       end do
    end subroutine
 

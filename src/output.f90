@@ -111,15 +111,15 @@ SUBROUTINE OUTPT
                case ('F', 'f') !A,F
                   WRITE (*, 11) X
                   WRITE (output_file_unit, 11) X  ! Also write to file
-      11          FORMAT(' ', 1pE14.7, 1PE10.2, '  ', $)
+      11          FORMAT(' f=', 1pE14.7, 1PE10.2, '  ', $)
                case ('P', 'p') ! P
                   WRITE (*, 13) P
                   WRITE (output_file_unit, 13) P  ! Also write to file
-      13          FORMAT(' ', F12.7, '  ', $)
+      13          FORMAT(' p=', F12.7, '  ', $)
                case ('Z', 'z') ! Z
                   WRITE (*, 15) Z
                   WRITE (output_file_unit, 15) Z  ! Also write to file
-      15          FORMAT(' ', F12.7, '  ', $)
+      15          FORMAT(' z=', F12.7, '  ', $)
                case ('E', 'e') ! E
                   WRITE (*, 17) EFL
                   WRITE (output_file_unit, 17) EFL  ! Also write to file

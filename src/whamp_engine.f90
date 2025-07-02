@@ -149,7 +149,7 @@ contains
       DEN = 0.d+0
       RED = 0.d+0
       loop_species: DO J = 1, 10
-         REN(J) = 1836.1*ASS(J)
+         REN(J) = mi_o_me*ASS(J)
          IF (REN(J) .EQ. 0.) REN(J) = 1.
          T(J) = TA(J)/TA(1)
          IF (DN(J) .EQ. 0.) cycle loop_species

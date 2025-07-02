@@ -31,6 +31,7 @@ PROGRAM WHAMP
    VD = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ! v_drift/v_term
    XC = 2.79928 ! electron gyrofrequency in kHz 
    PZL = 0.0 ! 1 - log scale, 0 - linear scale
+   mi_o_me = 1836.1_d2p ! default ion to electron mass ratio
    cycleZFirst = 1
    PM = [0.0, 0.0, 10.0]
    ZM = [0.0, 0.0, 10.0]
@@ -90,7 +91,7 @@ PROGRAM WHAMP
       DEN = 0.d+0 ! total electron density?
       RED = 0.d+0
       loop_species: DO J = 1, 10
-         REN(J) = 1836.1*ASS(J) ! mass of the particle normalized to m_e, TODO: check for hardcoded m_i/m_e
+         REN(J) = mi_o_me*ASS(J) ! mass of the particle normalized to m_e, TODO: check for hardcoded m_i/m_e
          IF (REN(J) .EQ. 0.) REN(J) = 1.
          T(J) = TA(J)/TA(1) ! temperature of species normalized by species 1 temperature
          IF (DN(J) .EQ. 0.) cycle loop_species ! ignore 0 density species
