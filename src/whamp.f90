@@ -1,4 +1,5 @@
 PROGRAM WHAMP
+   use ieee_arithmetic, only: ieee_value, ieee_quiet_nan
    use comin
    use comcout
    implicit none
@@ -169,8 +170,16 @@ PROGRAM WHAMP
                PRINT 125, P, Z, X, I, IRK
 125            FORMAT(2X, 'NO CONVERGENCE!'/'  KP=', F6.3, '  KZ=',&
                       & F6.4, '  X=', E12.2, E12.2/'  I=', I3, '  IRK=', I3/)
-               IF (KFS .EQ. 1) PLG = 1.D99 ! end cycling in P
-               IF (KFS .EQ. 2) ZLG = 1.D99 ! end cycling in Z
+               if (continue_on_failure) then
+                  ! Set frequency to NaN for failed convergence
+                  X = create_complex_nan()
+                  ! Write failure info with NaN frequency
+                  CALL OUTPT()
+               else
+                  ! Original behavior - break loop
+                  IF (KFS .EQ. 1) PLG = 1.D99 ! end cycling in P
+                  IF (KFS .EQ. 2) ZLG = 1.D99 ! end cycling in Z
+               end if
             end if
             if ((rootFindingConverged) .AND. (.not. solutionIsTooHeavilyDamped)) then
                !                  ****  CONVERGENCE!  ****
@@ -203,11 +212,20 @@ PROGRAM WHAMP
                PRINT *, ' TOO HEAVILY DAMPED!'
                PRINT *, '   '
                IERR = 0
-               CALL OUTPT
-               IF (KFS .EQ. 1) PLG = 1.D99
-               IF (KFS .EQ. 2) ZLG = 1.D99
+
+               if (continue_on_failure) then
+                  ! Set frequency to NaN for heavily damped solutions
+                  X = create_complex_nan()
+                  ! Write failure info with NaN frequency
+                  CALL OUTPT()
+               else
+                  ! Original behavior - break loop
+                  IF (KFS .EQ. 1) PLG = 1.D99 ! end cycling
+                  IF (KFS .EQ. 2) ZLG = 1.D99 ! end cycling
+               end if
             end if
 
+                        ! Continue the loop regardless of convergence status
             if (KFS == 1) then        ! cycle first P
                PLG = PLG + PM(3)
                !                   **** UPDATE P AND Z.  ****
@@ -238,17 +256,29 @@ PROGRAM WHAMP
                   P = PLG + PZL*(10.**PLG - PLG)
                end if
             end if
-            !                    ****  NEW START FREQUENCY.  ****
+            
+            ! Always continue to next frequency calculation
+            ! (even for failed cases, use best available guess)
             IF (KV /= 0) then
-               DKP = P - PVO
-               DKZ = Z - ZVO
-               ddDX = (DKP*DOP + DKZ*DOZ)/DOX
-               X = XVO - ddDX
+               if (rootFindingConverged) then
+                  DKP = P - PVO
+                  DKZ = Z - ZVO
+                  ddDX = (DKP*DOP + DKZ*DOZ)/DOX
+                  X = XVO - ddDX
+               else
+                  ! Use simple extrapolation for failed cases
+                  X = XVO  ! Keep previous frequency as starting guess
+               end if
             else
-               DKP = P - PO
-               DKZ = Z - ZO
-               ddDX = (DKP*DP + DKZ*DZ)/DX
-               X = XO - ddDX
+               if (rootFindingConverged) then
+                  DKP = P - PO
+                  DKZ = Z - ZO
+                  ddDX = (DKP*DP + DKZ*DZ)/DX
+                  X = XO - ddDX
+               else
+                  ! Use simple extrapolation for failed cases
+                  X = XO  ! Keep previous frequency as starting guess
+               end if
             end if
          end do loop_z_p
       end do loop_typin
@@ -257,12 +287,12 @@ contains
    subroutine print_plasma_parameters
       !                  ****  PRINT PLASMA PARAMETERS.  ****
       PRINT 101, PX, XA, PXN
-101   FORMAT('# TOTAL PLASMA FREQ.:', F11.5,&
-             & ' KHZ; SPEC 1 GYRO FREQ.:', F10.5, ' KHZ; ',&
-             & 'SPEC 1 PLASMA FREQ.:', F11.5, ' KHZ; ')
+101   FORMAT('# TOTAL PLASMA FREQ.:', F11.7,&
+             & ' KHZ; SPEC 1 GYRO FREQ.:', F10.7, ' KHZ; ',&
+             & 'SPEC 1 PLASMA FREQ.:', F11.7, ' KHZ; ')
       PRINT 102, VTH, BETA
-102   FORMAT('# SPECIES 1 parallel V_TH/C:', F11.6, &
-             & ';  SPECIES 1 parallel BETA:', F11.6)
+102   FORMAT('# SPECIES 1 parallel V_TH/C:', F11.7, &
+             & ';  SPECIES 1 parallel BETA:', F11.7)
       DO J = 1, JMA
 103      FORMAT('# ', A3, '  DN=', 1PE12.5, '  T=', 0PF9.5, '  D=', F4.2,&
                 &'  A=', F4.2, '  B=', F4.2, ' VD=', F5.2)
@@ -347,4 +377,39 @@ contains
          write (symbol, '(a,I3)') 'm=', mass
       end if
    end function
+   subroutine OUTPT_FAILURE(P_fail, Z_fail, X_fail, I_fail, IRK_fail)
+      ! Output failure information to maintain data continuity
+      use comin
+      use comcout
+      implicit none
+      real(kind=d2p), intent(in) :: P_fail, Z_fail
+      complex(kind=d2p), intent(in) :: X_fail
+      integer, intent(in) :: I_fail, IRK_fail
+      integer, parameter :: output_file_unit = 20
+      
+      ! Write failure marker to output file
+      open(unit=output_file_unit, file=trim(output_filename), status='unknown', position='append')
+      
+      ! Write basic parameters even for failed cases
+      write(output_file_unit, '(A,F12.7,A,F12.7,A,2E12.2,A,I3,A,I3,A)') &
+           ' p=', P_fail, ' z=', Z_fail, ' f=', X_fail, ' ITER=', I_fail, ' IRK=', IRK_fail, ' FAILED'
+      
+      close(output_file_unit)
+   end subroutine
+   function create_nan() result(nan_value)
+      implicit none
+      real(kind=d2p) :: nan_value
+      real(kind=d2p) :: zero = 0.0_d2p
+      
+      ! Create NaN by dividing zero by zero
+      nan_value = zero / zero
+   end function create_nan
+   function create_complex_nan() result(nan_complex)
+      implicit none
+      complex(kind=d2p) :: nan_complex
+      real(kind=d2p) :: nan_real
+      
+      nan_real = ieee_value(0.0_d2p, ieee_quiet_nan)
+      nan_complex = cmplx(nan_real, nan_real, kind=d2p)
+   end function create_complex_nan
 end program WHAMP
