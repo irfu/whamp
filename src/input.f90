@@ -42,7 +42,7 @@ SUBROUTINE read_input_file(FILENAME)
 contains
    subroutine skip_comments_and_read_single(unit, var)
       integer, intent(in) :: unit
-      real(kind=8), intent(out) :: var
+      real(kind=d2p), intent(out) :: var
       character(len=200) :: line
       
       do
@@ -85,7 +85,7 @@ contains
 
    subroutine skip_comments_and_read(unit, array)
       integer, intent(in) :: unit
-      real(kind=8), intent(out) :: array(:)
+      real(kind=d2p), intent(out) :: array(:)
       character(len=200) :: line
       
       do

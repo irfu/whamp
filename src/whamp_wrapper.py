@@ -1,10 +1,90 @@
 import subprocess
-import time
 import os
 import sys
-from pathlib import Path
+import re
+import pandas as pd
+import numpy as np
 
-
+# Cell 2: Read the WHAMP output file with proper parsing
+def read_whamp_output(filename):
+    """
+    Read WHAMP output data from text file into a pandas DataFrame.
+    
+    Parameters:
+    filename: path to the text file containing WHAMP output
+    
+    Returns:
+    DataFrame with columns extracted from the WHAMP output format
+    """
+    try:
+        data = []
+        
+        with open(filename, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if not line:  # Skip empty lines
+                    continue
+                
+                # Initialize row data
+                row = {}
+                
+                # Extract p value - more specific pattern
+                p_match = re.search(r'p=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if p_match:
+                    row['p'] = float(p_match.group(1))
+                
+                # Extract z value - more specific pattern
+                z_match = re.search(r'z=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if z_match:
+                    row['z'] = float(z_match.group(1))
+                
+                # Extract f (frequency) - handle scientific notation properly
+                # Pattern: f= number number (where numbers can be in scientific notation)
+                f_match = re.search(r'f=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if f_match:
+                    row['omega_r'] = float(f_match.group(1))
+                    row['omega_i'] = float(f_match.group(2))
+                
+                # Extract EX (electric field X component) - handle spacing properly
+                ex_match = re.search(r'EX=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if ex_match:
+                    row['EX_real'] = float(ex_match.group(1))
+                    row['EX_imag'] = float(ex_match.group(2))
+                
+                # Extract EY (electric field Y component)
+                ey_match = re.search(r'EY=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if ey_match:
+                    row['EY_real'] = float(ey_match.group(1))
+                    row['EY_imag'] = float(ey_match.group(2))
+                
+                # Extract EZ (electric field Z component)
+                ez_match = re.search(r'EZ=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if ez_match:
+                    row['EZ_real'] = float(ez_match.group(1))
+                    row['EZ_imag'] = float(ez_match.group(2))
+                
+                # Extract BETA - handle scientific notation
+                beta_match = re.search(r'BETA=([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)', line)
+                if beta_match:
+                    row['BETA'] = float(beta_match.group(1))
+                
+                # Extract A (alpha parameter) - more specific pattern to avoid matching BETA
+                a_match = re.search(r'A=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*$', line)
+                if a_match:
+                    row['A'] = float(a_match.group(1))
+                
+                # Only add row if we found at least p, z, and frequency data
+                if 'p' in row and 'z' in row and 'omega_r' in row:
+                    data.append(row)
+        
+        # Create DataFrame
+        df = pd.DataFrame(data)
+        
+        return df
+        
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return None
 
 def run_whamp_automated(model_file, output_file, max_iterations=1900, commands=None):
     """
@@ -34,7 +114,7 @@ def run_whamp_automated(model_file, output_file, max_iterations=1900, commands=N
     ]
     
     print(f"Running WHAMP with command: {' '.join(whamp_cmd)}")
-    print(f"Input commands: {commands}")
+    #print(f"Input commands: {commands}")
     
     try:
         # Start the WHAMP process
@@ -196,56 +276,58 @@ if __name__ == "__main__":
     print("Example 1: Single WHAMP run")
     success = run_whamp_automated(
         model_file='../Models/H17f3c',
-        output_file='../results/parallel_firehose5.txt'
+        output_file='../results/parallel_firehose5.txt', max_iterations=3000
     )
     
     if success:
         print("\nSingle run completed successfully!")
 
     # Example 1.5: Parameter sweep for different A values saved in the same file
-    a_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] # sweep over T_perp/T_par
-    c_values = [0.01986/i for i in range(1,5)]  # sweep over cyclotron frequency
-    f_values = [1e-4 for i in range(1,5)]  # sweep over frequency
-    commands = ['p0z.1,1,-.1f1e-4', 'pzfewa']
+
+    a_values = np.logspace(np.log10(0.1), np.log10(1.0), num=20)  # logarithmically spaced between 0.1 and 1.0 inclusive
+    c_values = np.logspace(np.log10(2*0.01986), np.log10(0.01986/4), num=40)  # logarithmically spaced cyclotron frequency
+    f_values = [1e-1 for _ in range(len(c_values))]  # sweep over frequency
+    commands = ['p0z0,1.5,-.1f1e-4', 'pzfewa']
     for c, f in zip(c_values, f_values):
         for a in a_values:
             commands.append(f'c{c}a{a}f{f}')
-            commands.append('p0z.1,1,-.1')
+            if a > 0.8:
+                commands.append('z0,.6,-.05')
+            else:
+                commands.append('z0,2,-.1')
+            commands.append('p0z0,1,-.05')
     commands.append('S')
     print("Example 1: Single WHAMP run")
     success = run_whamp_automated(
         model_file='../Models/H17f3c',
-        output_file='../results/parallel_firehose_sweep.txt',
+        output_file='../results/parallel_firehose_sweep2.txt', max_iterations=3000,
         commands=commands
     )
     
     if success:
         print("\Parameter sweep runs completed successfully!")
     
-    # Example 2: Parameter sweep for different A values
-    #print("\n" + "="*60)
-    #print("Example 2: Parameter sweep for different A values")
+#     Cell 3: Load your data
+filename = '/Users/u0167590/github/whamp/results/parallel_firehose_sweep.txt'
+df = read_whamp_output(filename)
+# Display basic info about the data
+if df is not None:
+    print(f"Data loaded successfully!")
+    print(f"Shape: {df.shape}")
+    print(f"\nColumn names: {list(df.columns)}")
+    print(f"\nUnique A values: {sorted(df['A'].unique())}")
+    print(f"\nUnique BETA values: {sorted(df['BETA'].unique())}")
+    print(f"\nFirst few rows:")
+    print(df.head())
     
-    #a_values = [0.1, 0.2, 0.3, 0.4, 0.5]
-    #results = run_whamp_parameter_sweep(
-    #    model_file='../Models/H17f3c',
-    #    output_base='../results/parallel_firehose_sweep',
-    #    a_values=a_values
-    #)
-    
-    #print("\nParameter sweep results:")
-    #for result in results:
-    #    status = "✓" if result['success'] else "✗"
-    #    print(f"{status} A = {result['A_value']:.3f} -> {result['output_file']}")
-    
-    # Example 3: Interactive mode with real-time output
-    #print("\n" + "="*60)
-    #print("Example 3: Interactive mode")
-    
-    #success = run_whamp_interactive_realtime(
-    #    model_file='../Models/H17f3c',
-    #    output_file='../results/parallel_firehose_interactive.txt'
-    #)
-    
-    #if success:
-    #    print("\nInteractive run completed successfully!")
+    # Group by A value to see data structure
+    print(f"\nData grouped by A value:")
+    for beta_val in sorted(df['BETA'].unique()):
+        print(f"\nBETA = {beta_val}:")
+        for a_val in sorted(df['A'].unique()):
+            subset = df[(df['A'] == a_val) & (df['BETA'] == beta_val)]
+            subset1e3 = df[(df['A'] == a_val) & (df['BETA'] == beta_val) & (df['omega_r'] > 1e3)]
+            print(f"A = {a_val}, BETA = {beta_val}: {len(subset)} entries with {len(subset1e3)} entries above omega_r > 1e3")
+    print(f" Total number of entries {len(df)}, total number of omega_r > 1e3: {len(df[df['omega_r'] > 1e3])}")
+else:
+    print("Failed to load data")

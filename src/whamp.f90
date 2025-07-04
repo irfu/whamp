@@ -18,6 +18,9 @@ PROGRAM WHAMP
    real(kind=d2p)    :: DEK, DET, DKP, DKZ, KV, PFQ, PLG, PLO, PO, PVO
    real(kind=d2p)    :: RED, ST, T, TR, XA, XI, ZLG, ZLO, ZO, ZVO
    COMPLEX(kind=d2p) :: XO, XVO, ddDX, OME, FPX, DOX, DOZ, DOP
+      ! Add convergence tolerance parameters
+   real(kind=d2p) :: rel_tol = 1.0E-6_d2p  ! relative tolerance
+   real(kind=d2p) :: abs_tol = 1.0E-6_d2p  ! absolute tolerance
    DIMENSION T(10), ST(10)
    integer           :: narg, iarg
    character(len=20) :: inputParameter, modelFilename
@@ -47,7 +50,7 @@ PROGRAM WHAMP
       if (printDebugInfo) write (*, *) "Input parameter:", inputParameter
       select case (adjustl(inputParameter))
       case ("-help", "-h", "--help")
-         write (*, *) "usage: whamp [-help] [-debug] [-maxiterations <number>] [-file <modelFilename>] [-outfile <outputFilename>]"
+         write (*, *) "usage: whamp [-help] [-debug] [-maxiterations <number>] [-file <modelFilename>] [-outfile <outputFilename>] [-rel_tol <value>] [-abs_tol <value>] "
          stop
       case ("-debug")
          printDebugInfo = .true.
@@ -69,6 +72,24 @@ PROGRAM WHAMP
          iArg = iArg + 1
          call get_command_argument(iArg, output_filename)
          if (printDebugInfo) write (*, *) "Output file: ", trim(output_filename)
+      case ("-rel_tol")
+         if (iArg == narg) then
+            write (*, *) "ERROR: Relative tolerance is not specified"
+            stop
+         end if
+         iArg = iArg + 1
+         call get_command_argument(iArg, inputParameter)
+         read (inputParameter, *) rel_tol
+         if (printDebugInfo) write (*, *) "Relative tolerance: ", rel_tol
+      case ("-abs_tol")
+         if (iArg == narg) then
+            write (*, *) "ERROR: Absolute tolerance is not specified"
+            stop
+         end if
+         iArg = iArg + 1
+         call get_command_argument(iArg, inputParameter)
+         read (inputParameter, *) abs_tol
+         if (printDebugInfo) write (*, *) "Absolute tolerance: ", abs_tol
       case ("-maxiterations")
          if (iArg == narg) then
             write (*, *) "ERROR: maxiterations is not specified"
@@ -333,8 +354,8 @@ contains
                exit loop_iteration
             end if
             IF (ABS(D) .LT. ADIR) then
-               if ((ABS(CX) .LE. 1.E-6*ABS(X)) & ! relative frequency precision
-                   & .or. (ABS(CX) < 1e-6)) then ! absolute precision
+               if ((ABS(CX) .LE. rel_tol*ABS(X)) & ! relative frequency precision
+                   & .or. (ABS(CX) < abs_tol)) then ! absolute precision
                   rootFindingConverged = .true.
                   if (I >= 2) then ! at least 2 steps have been made
                      exit loop_iteration

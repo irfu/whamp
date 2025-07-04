@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    252181,       5557]
-NotebookOptionsPosition[    244530,       5429]
-NotebookOutlinePosition[    244924,       5445]
-CellTagsIndexPosition[    244881,       5442]
+NotebookDataLength[    253797,       5594]
+NotebookOptionsPosition[    246048,       5465]
+NotebookOutlinePosition[    246442,       5481]
+CellTagsIndexPosition[    246399,       5478]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -5425,7 +5425,43 @@ SPEC 1 PLASMA FREQ.:    0.20953 KHZ; \n# SPECIES 1 parallel V_TH/C:   \
    3.960378188536875*^9, {3.960378743689474*^9, 3.960378745075842*^9}, {
    3.960378893116784*^9, 
    3.960378893535905*^9}},ExpressionUUID->"87e24be2-b344-46a9-868a-\
-882ddc9be6f5"]
+882ddc9be6f5"],
+
+Cell[TextData[{
+ "Now it is possible to converge where the algorithm was failing:\n",
+ StyleBox[" ./whamp -file ../Models/H17f3b ",
+  FontWeight->"Bold"],
+ "\n# TOTAL PLASMA FREQ.:    8.98090 KHZ; SPEC 1 GYRO FREQ.:   0.00001 KHZ; \
+SPEC 1 PLASMA FREQ.:    0.20953 KHZ; \n# SPECIES 1 parallel V_TH/C:   \
+0.000103;  SPECIES 1 parallel BETA:   3.999683\n# H+   DN= 1.00000E+06  T=  \
+0.00500  D=1.00  A=0.49  B=0.00 VD= 0.00\n# e-   DN= 1.00000E+06  T=  0.00000 \
+ D=1.00  A=1.00  B=0.00 VD= 0.00\n#INPUT: \n  \n",
+ StyleBox["p0z.1f1e-3",
+  FontWeight->"Bold"],
+ "\n#OUTPUT: \n\n",
+ StyleBox["pzf",
+  FontWeight->"Bold"],
+ "\n",
+ StyleBox["  NO CONVERGENCE!",
+  FontWeight->"Bold"],
+ "\n  KP= 0.000  KZ=0.1000  X=    0.86E+02    0.39E+03\n  I= 51  IRK=  1\n",
+ StyleBox["./whamp -maxiterations 200  -file ../Models/H17f3b",
+  FontWeight->"Bold"],
+ "\n# TOTAL PLASMA FREQ.:    8.98090 KHZ; SPEC 1 GYRO FREQ.:   0.00001 KHZ; \
+SPEC 1 PLASMA FREQ.:    0.20953 KHZ; \n# SPECIES 1 parallel V_TH/C:   \
+0.000103;  SPECIES 1 parallel BETA:   3.999683\n# H+   DN= 1.00000E+06  T=  \
+0.00500  D=1.00  A=0.49  B=0.00 VD= 0.00\n# e-   DN= 1.00000E+06  T=  0.00000 \
+ D=1.00  A=1.00  B=0.00 VD= 0.00\n#INPUT: \n  \n",
+ StyleBox["p0z.1f1e-3",
+  FontWeight->"Bold"],
+ "\n#OUTPUT: \n\npzf\n    0.0000000      0.1000000  ",
+ StyleBox["  8.3122224E+05 -1.15E-06    ",
+  FontWeight->"Bold"],
+ "\n"
+}], "Text",
+ CellChangeTimes->{{3.960382902355381*^9, 
+  3.96038293943582*^9}},ExpressionUUID->"450497bd-d7ae-41a4-920a-\
+0732c5a56147"]
 },
 WindowSize->{613, 761},
 WindowMargins->{{Automatic, 109}, {40, Automatic}},
@@ -5558,7 +5594,8 @@ Cell[CellGroupData[{
 Cell[210277, 4645, 405, 10, 30, "Input",ExpressionUUID->"62950d4f-db49-457b-948d-ab9cf6139ccd"],
 Cell[210685, 4657, 30606, 686, 239, "Output",ExpressionUUID->"3674bcaa-3f04-425b-bb70-79bed3aee670"]
 }, Open  ]],
-Cell[241306, 5346, 3220, 81, 932, "Text",ExpressionUUID->"87e24be2-b344-46a9-868a-882ddc9be6f5"]
+Cell[241306, 5346, 3220, 81, 932, "Text",ExpressionUUID->"87e24be2-b344-46a9-868a-882ddc9be6f5"],
+Cell[244529, 5429, 1515, 34, 702, "Text",ExpressionUUID->"450497bd-d7ae-41a4-920a-0732c5a56147"]
 }
 ]
 *)

@@ -16,6 +16,7 @@ module comin
    real(kind=d2p) :: BETA      ! beta of the first species, ratio of thermal velocity to gyrofrequency
    real(kind=d2p) :: mi_o_me   ! mass ratio between ions and electrons typically set to 1836.1
 
+
    logical        :: printDebugInfo = .false.
    logical :: continue_on_failure = .true.  ! Flag to continue loop on convergence failure
    character(len=100) :: output_filename = 'whamp_output.txt'  ! Default output filename
