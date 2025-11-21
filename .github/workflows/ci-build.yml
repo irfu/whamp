@@ -23,7 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # Runs a set of commands using the runners shell
       - name: Compile Fortran code
@@ -51,7 +51,7 @@ jobs:
     needs: build
     steps:
       # Check-out repository
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # Install MATLAB (GitHub action provided by MathWorks)
       - name: Install MATLAB
