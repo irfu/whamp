@@ -33,7 +33,7 @@ jobs:
 
       # Upload artifact
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           # Artifact name
           name: builtWhamp
