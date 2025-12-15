@@ -59,7 +59,7 @@ jobs:
 
       # Download artifact from "build"
       - name: Download artifact from build
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: builtWhamp
           path: src/
