@@ -5,6 +5,7 @@
 *.log
 *.out
 *.synctex.gz
+*.exe
 src/*.mod
 src/whamp
 src/whamptest

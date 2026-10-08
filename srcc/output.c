@@ -12,7 +12,7 @@
 /* Locals of OUTPT/INOUT with Fortran SAVE semantics */
 static double andE, andphi, coef_poynt, dla, dlb, dle, Sx, Sy, Sz;
 static cd andbz;
-static int LoopI, IOS, J, KMX, M, N, K;
+static int IOS, J, KMX, M, N, K;
 static char IOU[21];
 static char IC;
 

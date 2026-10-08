@@ -50,6 +50,7 @@ void AV(void)
     POYN[1] = creal(EFL[2] * conjg(BFL[3]) - EFL[3] * conjg(BFL[2])) * coef;
     POYN[2] = creal(EFL[3] * conjg(BFL[1]) - EFL[1] * conjg(BFL[3])) * coef;
     POYN[3] = creal(EFL[1] * conjg(BFL[2]) - EFL[2] * conjg(BFL[1])) * coef;
+    (void)POYN; /* computed but unused, as in the original Fortran */
 
     /* *** calculate energy in fields */
     A = creal(EFL[1] * conjg(EFL[1]) + EFL[2] * conjg(EFL[2]) + EFL[3] * conjg(EFL[3]));
@@ -105,6 +106,7 @@ void AV(void)
         U32 = U3 * U3;
         U2 = U12 + U32;
         U13 = 2. * U1 * U3;
+        (void)U13; /* computed but unused, as in the original Fortran */
 
         /*        ****** COMPLETE X-DERIVATIVE OF DIELECTRIC TENSOR ****** */
         E[1][2] = E[1][2] - 2. * (E[1][1] - 1.);

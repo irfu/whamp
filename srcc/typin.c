@@ -74,7 +74,11 @@ void TYPIN(int *NPL, int *KFS)
     int IE = 1, IOF = 1, IOS, NC, NV = 0;
     int flagSuccessReading, flagAmbiguousCharacter, flagTooLongNumber, flagNextNumber;
     int helpRequested;
-    float DEC, DEK;
+    /* DEC/DEK are only read once a variable name has been seen, and
+     * inputVariable becomes non-blank only after the reset block that
+     * assigns DEK = 10., DEC = 1.  Initialise to those same values to
+     * silence -Wmaybe-uninitialized (the values are never observed). */
+    float DEC = 1., DEK = 10.;
     const char UPP_LTRS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const char DIGITS[] = "0123456789";
     const char LOW_LTRS[] = "abcdefghijklmnopqrstuvwxyz";

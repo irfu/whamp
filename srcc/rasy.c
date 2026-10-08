@@ -8,7 +8,12 @@
 void RASY(cd Y, double AL, cd *RC)
 {
     int m, n;
-    double A, AY, C, T;
+    double A, AY, C;
+    /* T is assigned by `T = C` on every iteration with m < AY; since
+     * AY = |Y| + 2 >= 2 > 0 = m on the first iteration, T is always
+     * written before the `C >= T` test can be reached.  Initialise to
+     * silence -Wmaybe-uninitialized (the value is never observed). */
+    double T = 0.;
     cd Y2, COT, P, PY, PP, PPY, PN, PYN, QN, QYN;
     static const double PI = 3.14159265358979;
 

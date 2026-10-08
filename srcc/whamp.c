@@ -197,7 +197,7 @@ int main(int argc, char **argv)
 
     IERR = 0;
 
-loop_plasma_update:
+    /* loop_plasma_update */
     for (;;) {
         isChangedPlasmaModel = 0; /* changed to .true. in code when new plasma
                                      parameters are entered */
@@ -235,7 +235,7 @@ loop_plasma_update:
 
         print_plasma_parameters();
         /*                  ****  ASK FOR INPUT!  **** */
-    loop_typin:
+        /* loop_typin */
         for (;;) {
             /* for new plasma skip calling typin until convergence checked */
             if (!isChangedPlasmaModel)
